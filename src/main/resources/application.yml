@@ -1,0 +1,97 @@
+spring:
+  application:
+    name: chat-ai-agent
+  profiles:
+    active: local
+  ai:
+    dashscope:
+      # 请在 application-local.yml 中配置你的 API key
+      api-key: your-dashscope-api-key-here
+      chat:
+        options:
+          model: qwen-plus
+      chat-vl:
+        options:
+          model: qwen-vl-max-latest
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        model: gemma3:1b
+    # MCP 服务配置（可选，需要启动 MCP 服务）
+    mcp:
+      client:
+        stdio:
+          servers-configuration: classpath:mcp-servers.json
+    # 向量数据库配置（可选，需要启动 PgVector 数据库）
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        dimensions: 1536
+        distance-type: COSINE_DISTANCE
+        max-document-batch-size: 10000
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      # 如需密码请在 application-local.yml 中配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/ggy_picture
+    username: root
+    # 请在 application-local.yml 中配置数据库密码
+    password: your-database-password-here
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+# MyBatis-Flex 配置
+mybatis-flex:
+  mapper-locations: classpath*:/mapper/*.xml
+  type-aliases-package: cn.chat.ggy.chataiagent.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    call-setters-on-nulls: true
+    jdbc-type-for-null: 'null'
+
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+
+# 应用配置
+app:
+  base-url: http://localhost:8123
+
+# Search API 配置
+search-api:
+  # 请在 application-local.yml 中配置你的 Search API Key
+  api-key: your-search-api-key-here
+
+# SpringDoc OpenAPI 配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: cn.chat.ggy.chataiagent.controller
+
+# Knife4j 配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+# 日志配置
+logging:
+  level:
+    org.springframework.ai: INFO
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
