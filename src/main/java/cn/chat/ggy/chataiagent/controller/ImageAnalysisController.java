@@ -13,6 +13,9 @@ import cn.chat.ggy.chataiagent.entity.ImageAnalysis;
 import cn.chat.ggy.chataiagent.service.ImageAnalysisService;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * 图片解析信息表 控制层。
@@ -21,6 +24,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/imageAnalysis")
+@Tag(name = "图片解析管理", description = "图片解析信息的增删改查操作接口，用于管理AI图片分析结果")
 public class ImageAnalysisController {
 
     @Autowired
@@ -33,7 +37,8 @@ public class ImageAnalysisController {
      * @return {@code true} 保存成功，{@code false} 保存失败
      */
     @PostMapping("save")
-    public boolean save(@RequestBody ImageAnalysis imageAnalysis) {
+    @Operation(summary = "保存图片解析信息", description = "创建新的图片解析记录，存储AI对图片的分析结果")
+    public boolean save(@Parameter(description = "图片解析信息实体对象", required = true) @RequestBody ImageAnalysis imageAnalysis) {
         return imageAnalysisService.save(imageAnalysis);
     }
 
@@ -44,7 +49,8 @@ public class ImageAnalysisController {
      * @return {@code true} 删除成功，{@code false} 删除失败
      */
     @DeleteMapping("remove/{id}")
-    public boolean remove(@PathVariable Long id) {
+    @Operation(summary = "删除图片解析信息", description = "根据主键ID删除指定的图片解析记录")
+    public boolean remove(@Parameter(description = "图片解析信息主键ID", required = true, example = "1") @PathVariable Long id) {
         return imageAnalysisService.removeById(id);
     }
 
@@ -55,7 +61,8 @@ public class ImageAnalysisController {
      * @return {@code true} 更新成功，{@code false} 更新失败
      */
     @PutMapping("update")
-    public boolean update(@RequestBody ImageAnalysis imageAnalysis) {
+    @Operation(summary = "更新图片解析信息", description = "根据主键更新图片解析信息内容")
+    public boolean update(@Parameter(description = "图片解析信息实体对象", required = true) @RequestBody ImageAnalysis imageAnalysis) {
         return imageAnalysisService.updateById(imageAnalysis);
     }
 
@@ -65,6 +72,7 @@ public class ImageAnalysisController {
      * @return 所有数据
      */
     @GetMapping("list")
+    @Operation(summary = "查询所有图片解析信息", description = "获取系统中所有图片解析记录列表")
     public List<ImageAnalysis> list() {
         return imageAnalysisService.list();
     }
@@ -76,7 +84,8 @@ public class ImageAnalysisController {
      * @return 图片解析信息表详情
      */
     @GetMapping("getInfo/{id}")
-    public ImageAnalysis getInfo(@PathVariable Long id) {
+    @Operation(summary = "获取图片解析信息详情", description = "根据主键ID获取单个图片解析记录的详细信息")
+    public ImageAnalysis getInfo(@Parameter(description = "图片解析信息主键ID", required = true, example = "1") @PathVariable Long id) {
         return imageAnalysisService.getById(id);
     }
 
@@ -87,7 +96,8 @@ public class ImageAnalysisController {
      * @return 分页对象
      */
     @GetMapping("page")
-    public Page<ImageAnalysis> page(Page<ImageAnalysis> page) {
+    @Operation(summary = "分页查询图片解析信息", description = "根据分页参数查询图片解析信息列表")
+    public Page<ImageAnalysis> page(@Parameter(description = "分页查询参数", required = true) Page<ImageAnalysis> page) {
         return imageAnalysisService.page(page);
     }
 

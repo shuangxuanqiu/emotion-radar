@@ -14,6 +14,7 @@ import cn.chat.ggy.chataiagent.service.CacheService;
 import cn.chat.ggy.chataiagent.service.ChatSessionManagementService;
 import cn.chat.ggy.chataiagent.service.FeedbackMessageService;
 import cn.hutool.core.util.RandomUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/chat-ai")
-@Tag(name = "基础服务", description = "基础服务-")
+@Tag(name = "情感雷达核心服务")
 @Slf4j
 public class HealthController {
     @Resource
@@ -52,7 +53,15 @@ public class HealthController {
     private ChatSessionManagementService chatSessionManagementService;
 
 
+    /**
+     * 返回一个的内容是 json 格式
+     * @param file
+     * @param emotionalIndex
+     * @return
+     * @throws IOException
+     */
     @PostMapping(value = "/is-json", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "返回一个的内容是 json 格式")
     public ResultInfo resuleJson(@RequestParam("file") MultipartFile file, @RequestParam("emotionalIndex") Long emotionalIndex) throws IOException {
         long startTime = System.currentTimeMillis();
         String chatId = RandomUtil.randomString(6);
@@ -84,13 +93,13 @@ public class HealthController {
     }
 
     /**
-     * 核心服务
+     * 核心服务 emotion-radar
      * @param file
      * @param emotionalIndex
      * @return
      * @throws IOException
      */
-    @PostMapping(value = "/no-json", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.TEXT_HTML_VALUE)
+    @PostMapping(value = "/emotion-radar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.TEXT_HTML_VALUE)
     public String resultNoJson(@RequestParam("file") MultipartFile file, @RequestParam("emotionalIndex") Long emotionalIndex) throws IOException {
         long startTime = System.currentTimeMillis();
         String chatId = RandomUtil.randomString(6);

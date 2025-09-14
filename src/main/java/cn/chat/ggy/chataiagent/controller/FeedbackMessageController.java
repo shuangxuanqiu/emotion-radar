@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * 生成内容反馈表 控制层。
@@ -16,6 +19,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/feedbackMessage")
+@Tag(name = "用户反馈管理", description = "用户对生成内容反馈信息的增删改查操作接口")
 public class FeedbackMessageController {
 
     @Autowired
@@ -28,7 +32,8 @@ public class FeedbackMessageController {
      * @return {@code true} 保存成功，{@code false} 保存失败
      */
     @PostMapping("save")
-    public boolean save(@RequestBody FeedbackMessage feedbackMessage) {
+    @Operation(summary = "保存用户反馈", description = "创建新的用户反馈记录，记录用户对生成内容的评价和建议")
+    public boolean save(@Parameter(description = "用户反馈实体对象", required = true) @RequestBody FeedbackMessage feedbackMessage) {
         return feedbackMessageService.save(feedbackMessage);
     }
 
@@ -39,7 +44,8 @@ public class FeedbackMessageController {
      * @return {@code true} 删除成功，{@code false} 删除失败
      */
     @DeleteMapping("remove/{id}")
-    public boolean remove(@PathVariable Long id) {
+    @Operation(summary = "删除用户反馈", description = "根据主键ID删除指定的用户反馈记录")
+    public boolean remove(@Parameter(description = "用户反馈主键ID", required = true, example = "1") @PathVariable Long id) {
         return feedbackMessageService.removeById(id);
     }
 
@@ -50,7 +56,8 @@ public class FeedbackMessageController {
      * @return {@code true} 更新成功，{@code false} 更新失败
      */
     @PutMapping("update")
-    public boolean update(@RequestBody FeedbackMessage feedbackMessage) {
+    @Operation(summary = "更新用户反馈", description = "根据主键更新用户反馈信息")
+    public boolean update(@Parameter(description = "用户反馈实体对象", required = true) @RequestBody FeedbackMessage feedbackMessage) {
         return feedbackMessageService.updateById(feedbackMessage);
     }
 
@@ -60,6 +67,7 @@ public class FeedbackMessageController {
      * @return 所有数据
      */
     @GetMapping("list")
+    @Operation(summary = "查询所有用户反馈", description = "获取系统中所有用户反馈记录列表")
     public List<FeedbackMessage> list() {
         return feedbackMessageService.list();
     }
@@ -71,7 +79,8 @@ public class FeedbackMessageController {
      * @return 生成内容反馈表详情
      */
     @GetMapping("getInfo/{id}")
-    public FeedbackMessage getInfo(@PathVariable Long id) {
+    @Operation(summary = "获取用户反馈详情", description = "根据主键ID获取单个用户反馈的详细信息")
+    public FeedbackMessage getInfo(@Parameter(description = "用户反馈主键ID", required = true, example = "1") @PathVariable Long id) {
         return feedbackMessageService.getById(id);
     }
 
@@ -82,7 +91,8 @@ public class FeedbackMessageController {
      * @return 分页对象
      */
     @GetMapping("page")
-    public Page<FeedbackMessage> page(Page<FeedbackMessage> page) {
+    @Operation(summary = "分页查询用户反馈", description = "根据分页参数查询用户反馈列表")
+    public Page<FeedbackMessage> page(@Parameter(description = "分页查询参数", required = true) Page<FeedbackMessage> page) {
         return feedbackMessageService.page(page);
     }
 

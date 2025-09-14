@@ -13,6 +13,9 @@ import cn.chat.ggy.chataiagent.entity.ConsumeStatistic;
 import cn.chat.ggy.chataiagent.service.ConsumeStatisticService;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * token统计表 控制层。
@@ -21,6 +24,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/consumeStatistic")
+@Tag(name = "Token消费统计管理", description = "Token使用量统计数据的增删改查操作接口")
 public class ConsumeStatisticController {
 
     @Autowired
@@ -33,7 +37,8 @@ public class ConsumeStatisticController {
      * @return {@code true} 保存成功，{@code false} 保存失败
      */
     @PostMapping("save")
-    public boolean save(@RequestBody ConsumeStatistic consumeStatistic) {
+    @Operation(summary = "保存Token消费统计", description = "创建新的Token使用量统计记录")
+    public boolean save(@Parameter(description = "Token消费统计实体对象", required = true) @RequestBody ConsumeStatistic consumeStatistic) {
         return consumeStatisticService.save(consumeStatistic);
     }
 
@@ -44,7 +49,8 @@ public class ConsumeStatisticController {
      * @return {@code true} 删除成功，{@code false} 删除失败
      */
     @DeleteMapping("remove/{id}")
-    public boolean remove(@PathVariable Long id) {
+    @Operation(summary = "删除Token消费统计", description = "根据主键ID删除指定的Token消费统计记录")
+    public boolean remove(@Parameter(description = "Token消费统计主键ID", required = true, example = "1") @PathVariable Long id) {
         return consumeStatisticService.removeById(id);
     }
 
@@ -55,7 +61,8 @@ public class ConsumeStatisticController {
      * @return {@code true} 更新成功，{@code false} 更新失败
      */
     @PutMapping("update")
-    public boolean update(@RequestBody ConsumeStatistic consumeStatistic) {
+    @Operation(summary = "更新Token消费统计", description = "根据主键更新Token消费统计信息")
+    public boolean update(@Parameter(description = "Token消费统计实体对象", required = true) @RequestBody ConsumeStatistic consumeStatistic) {
         return consumeStatisticService.updateById(consumeStatistic);
     }
 
@@ -65,6 +72,7 @@ public class ConsumeStatisticController {
      * @return 所有数据
      */
     @GetMapping("list")
+    @Operation(summary = "查询所有Token消费统计", description = "获取系统中所有Token消费统计记录列表")
     public List<ConsumeStatistic> list() {
         return consumeStatisticService.list();
     }
@@ -76,7 +84,8 @@ public class ConsumeStatisticController {
      * @return token统计表详情
      */
     @GetMapping("getInfo/{id}")
-    public ConsumeStatistic getInfo(@PathVariable Long id) {
+    @Operation(summary = "获取Token消费统计详情", description = "根据主键ID获取单个Token消费统计的详细信息")
+    public ConsumeStatistic getInfo(@Parameter(description = "Token消费统计主键ID", required = true, example = "1") @PathVariable Long id) {
         return consumeStatisticService.getById(id);
     }
 
@@ -87,7 +96,8 @@ public class ConsumeStatisticController {
      * @return 分页对象
      */
     @GetMapping("page")
-    public Page<ConsumeStatistic> page(Page<ConsumeStatistic> page) {
+    @Operation(summary = "分页查询Token消费统计", description = "根据分页参数查询Token消费统计列表")
+    public Page<ConsumeStatistic> page(@Parameter(description = "分页查询参数", required = true) Page<ConsumeStatistic> page) {
         return consumeStatisticService.page(page);
     }
 
