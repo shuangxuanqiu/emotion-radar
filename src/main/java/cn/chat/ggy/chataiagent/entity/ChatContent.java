@@ -45,6 +45,11 @@ public class ChatContent implements Serializable {
      */
     @Column("chatId")
     private String chatId;
+    /**
+     * 生成的 html 文件地址
+     */
+    @Column("resultUrl")
+    private String resultUrl;
 
     /**
      * token 数量

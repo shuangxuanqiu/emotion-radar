@@ -6,6 +6,11 @@ import cn.chat.ggy.chataiagent.entity.ImageAnalysis;
 import cn.chat.ggy.chataiagent.mapper.ImageAnalysisMapper;
 import cn.chat.ggy.chataiagent.service.ImageAnalysisService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -92,6 +97,62 @@ public class ImageAnalysisServiceImpl extends ServiceImpl<ImageAnalysisMapper, I
             }
         } catch (Exception e) {
             log.error("保存图片分析信息到数据库失败: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 根据图片路径获取图片资源
+     *
+     * @param imagePath 图片路径
+     * @return 图片资源响应
+     */
+    @Override
+    public ResponseEntity<Resource> getImageResource(String imagePath) {
+        try {
+            // 构建完整的文件路径
+            String fullPath = FileConstant.FILE_SAVE_DIR + imagePath;
+            Path path = Paths.get(fullPath);
+            
+            // 检查文件是否存在
+            if (!Files.exists(path)) {
+                log.warn("图片文件不存在: {}", fullPath);
+                return ResponseEntity.notFound().build();
+            }
+            
+            // 检查是否为文件（不是目录）
+            if (!Files.isRegularFile(path)) {
+                log.warn("请求的不是文件: {}", fullPath);
+                return ResponseEntity.badRequest().build();
+            }
+            
+            // 创建文件资源
+            Resource resource = new FileSystemResource(path.toFile());
+            
+            // 获取文件的MIME类型
+            String contentType = Files.probeContentType(path);
+            if (contentType == null) {
+                // 如果无法确定MIME类型，根据文件扩展名设置
+                String fileName = path.getFileName().toString().toLowerCase();
+                if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+                    contentType = MediaType.IMAGE_JPEG_VALUE;
+                } else if (fileName.endsWith(".png")) {
+                    contentType = MediaType.IMAGE_PNG_VALUE;
+                } else if (fileName.endsWith(".gif")) {
+                    contentType = MediaType.IMAGE_GIF_VALUE;
+                } else {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+            }
+            
+            log.info("成功获取图片资源: {}", imagePath);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + path.getFileName().toString() + "\"")
+                    .body(resource);
+                    
+        } catch (Exception e) {
+            log.error("获取图片资源失败: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 }

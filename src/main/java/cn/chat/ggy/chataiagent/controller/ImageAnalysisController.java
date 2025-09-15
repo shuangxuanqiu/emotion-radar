@@ -1,6 +1,7 @@
 package cn.chat.ggy.chataiagent.controller;
 
 import com.mybatisflex.core.paginate.Page;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,10 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import cn.chat.ggy.chataiagent.entity.ImageAnalysis;
 import cn.chat.ggy.chataiagent.service.ImageAnalysisService;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -99,6 +103,23 @@ public class ImageAnalysisController {
     @Operation(summary = "分页查询图片解析信息", description = "根据分页参数查询图片解析信息列表")
     public Page<ImageAnalysis> page(@Parameter(description = "分页查询参数", required = true) Page<ImageAnalysis> page) {
         return imageAnalysisService.page(page);
+    }
+
+    /**
+     * 图片展示接口。
+     *
+     * @param request HTTP请求对象
+     * @return 图片资源
+     */
+    @GetMapping("/display/**")
+    @Operation(summary = "图片展示", description = "根据图片路径参数展示图片资源")
+    public ResponseEntity<Resource> displayImage(HttpServletRequest request) {
+        // 从请求URI中提取图片路径
+        String requestURI = request.getRequestURI();
+        String imagePath = requestURI.substring(requestURI.indexOf("/display/") + "/display".length());
+        
+        // 调用服务层方法处理图片展示
+        return imageAnalysisService.getImageResource(imagePath);
     }
 
 }

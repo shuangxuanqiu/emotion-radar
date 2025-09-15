@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 public interface ChatAIAssistant {
-    ResultInfo chatHelpMe(String message, MultipartFile file,Long emotionalIndex,String ChatId) throws IOException;
+    ResultInfo chatHelpMe(String message, MultipartFile file,Long emotionalIndex,String conversationScene,String ChatId) throws IOException;
 
 
     String htmlStorage(ResultInfo resultInfo, String chatId);

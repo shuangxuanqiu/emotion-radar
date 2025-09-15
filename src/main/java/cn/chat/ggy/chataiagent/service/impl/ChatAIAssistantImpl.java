@@ -44,8 +44,7 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
     private ImageAnalysisAPP imageAnalysisAPP;
     @Resource
     private ImageAnalysisService imageAnalysisService;
-    @Resource
-    private ChatContentService chatContentService;
+
     @Resource
     private HtmlTemplateOptimizer htmlTemplateOptimizer;
     @Resource
@@ -62,7 +61,7 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
      * @throws IOException
      */
     @Override
-    public ResultInfo chatHelpMe(String message, MultipartFile file, Long emotionalIndex, String chatId) throws IOException {
+    public ResultInfo chatHelpMe(String message, MultipartFile file, Long emotionalIndex,String conversationScene, String chatId) throws IOException {
         long startTime = System.currentTimeMillis();
         try {
             String imagePath = null;
@@ -111,8 +110,10 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
             
             // 添加情绪值信息
             if (emotionalIndex != null && emotionalIndex >= 1 && emotionalIndex <= 10) {
-                chatMessage += " \n 用户要求的情绪值：" + emotionalIndex;
+                chatMessage += " \n 用户要求的情绪值：" + emotionalIndex+" 分 \n";
             }
+            //添加聊天背景
+            chatMessage += " \n 用户要求的聊天背景："+conversationScene+" \n";
             
             // 第三步：进行AI聊天
             log.info("开始AI聊天处理，chatId: {}, 消息长度: {}", chatId, chatMessage.length());
@@ -124,10 +125,7 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
                 cacheService.cacheImageAnalysisResult(fileHash, emotionalIndex, result, 3600); // 缓存1小时
                 log.debug("分析结果已缓存 - fileHash: {}, emotionalIndex: {}", fileHash, emotionalIndex);
             }
-            
-            // 异步保存聊天内容到数据库（不阻塞接口返回）
-            chatContentService.saveChatContentAsync(result,chatId, null);
-            
+
             long endTime = System.currentTimeMillis();
             log.info("接口总耗时: {}ms, chatId: {}", (endTime - startTime), chatId);
             return result;

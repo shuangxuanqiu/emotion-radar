@@ -7,6 +7,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
@@ -32,6 +33,8 @@ public class ChatBasicsApp {
     private ToolCallback[] allTools;
     @Value("${search-api.api-key}")
     private String searchApiKey;
+    @Resource
+    private Advisor virtualSimulationRagCloudAdvisor;
     @Resource
     private ToolCallbackProvider toolCallbackProvider;
 
@@ -72,9 +75,10 @@ public class ChatBasicsApp {
                 ))//将房间 id 放入上下文
                 .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
 //                .advisors(new QuestionAnswerAdvisor(loveAppVectorStore))
+                .advisors(virtualSimulationRagCloudAdvisor)//加载云知识库
                 //开启自定义日志
-//                .advisors(new MyLoggerAdvisor())
-                .toolCallbacks(ToolCallbackProvider.from(allTools))
+                .advisors(new MyLoggerAdvisor())
+//                .toolCallbacks(ToolCallbackProvider.from(allTools))
                 .toolCallbacks(toolCallbackProvider)
                 .stream()
                 .content();

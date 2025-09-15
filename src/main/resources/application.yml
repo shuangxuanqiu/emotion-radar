@@ -33,7 +33,8 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
-      # 如需密码请在 application-local.yml 中配置
+  # 如需密码请在 application-local.yml 中配置
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/ggy_picture
@@ -54,6 +55,8 @@ mybatis-flex:
     cache-enabled: false
     call-setters-on-nulls: true
     jdbc-type-for-null: 'null'
+    # 开启SQL日志
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
 server:
   port: 8123
@@ -93,5 +96,12 @@ logging:
   level:
     org.springframework.ai: INFO
     root: INFO
+    # MyBatis SQL 日志
+    com.mybatisflex.core.audit.ConsoleMessageCollector: DEBUG
+    com.mybatisflex.core.audit.MessageCollector: DEBUG
+    # MyBatis 框架日志
+    org.apache.ibatis: DEBUG
+    # 您的 mapper 包日志（输出具体 SQL）
+    cn.chat.ggy.chataiagent.mapper: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

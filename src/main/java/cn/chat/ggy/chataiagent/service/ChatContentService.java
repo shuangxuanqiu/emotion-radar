@@ -13,5 +13,5 @@ import org.springframework.scheduling.annotation.Async;
 public interface ChatContentService extends IService<ChatContent> {
 
 
-    void saveChatContentAsync(ResultInfo resultInfo,String chatId, Long userId);
+    void saveChatContentAsync(ResultInfo resultInfo,String chatId,String resultUrl, Long userId);
 }

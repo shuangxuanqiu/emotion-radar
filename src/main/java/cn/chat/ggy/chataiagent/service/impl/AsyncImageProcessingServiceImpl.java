@@ -35,7 +35,7 @@ public class AsyncImageProcessingServiceImpl implements AsyncImageProcessingServ
                 log.info("开始异步处理图片和生成HTML - chatId: {}, 文件: {}", chatId, file.getOriginalFilename());
                 
                 // 执行图片分析
-                ResultInfo resultInfo = chatAIAssistant.chatHelpMe("请分析这张图片的内容", file, emotionalIndex, chatId);
+                ResultInfo resultInfo = chatAIAssistant.chatHelpMe("请分析这张图片的内容", file, emotionalIndex,"", chatId);
                 
                 // 生成HTML
                 String htmlUrl = chatAIAssistant.htmlStorage(resultInfo, chatId);
@@ -63,7 +63,7 @@ public class AsyncImageProcessingServiceImpl implements AsyncImageProcessingServ
             try {
                 log.info("开始异步图片分析 - chatId: {}, 消息长度: {}", chatId, message.length());
                 
-                ResultInfo resultInfo = chatAIAssistant.chatHelpMe(message, file, emotionalIndex, chatId);
+                ResultInfo resultInfo = chatAIAssistant.chatHelpMe(message, file, emotionalIndex,"", chatId);
                 
                 long endTime = System.currentTimeMillis();
                 log.info("异步图片分析完成 - 耗时: {}ms, chatId: {}", endTime - startTime, chatId);

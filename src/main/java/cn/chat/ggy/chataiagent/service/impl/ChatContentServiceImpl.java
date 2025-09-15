@@ -29,7 +29,7 @@ public class ChatContentServiceImpl extends ServiceImpl<ChatContentMapper, ChatC
      */
     @Async("databaseAsyncExecutor")
     @Override
-    public void saveChatContentAsync(ResultInfo resultInfo,String chatId, Long userId) {
+    public void saveChatContentAsync(ResultInfo resultInfo,String chatId,String resultUrl, Long userId) {
         try {
             // 将ResultInfo转换为JSON字符串存储
             String resultJson = JSONUtil.toJsonStr(resultInfo);
@@ -37,7 +37,8 @@ public class ChatContentServiceImpl extends ServiceImpl<ChatContentMapper, ChatC
             ChatContent chatContent = ChatContent.builder()
                     .resultContent(resultJson)
                     .userId(userId)
-                    .chatId(chatId)
+                    .resultUrl(resultUrl) // 生成的 url 地址
+                    .chatId(chatId)       // 房间 id
                     .tokenQuantity(0L) // 可以根据实际需要计算token数量
                     .createTime(LocalDateTime.now())
                     .updateTime(LocalDateTime.now())

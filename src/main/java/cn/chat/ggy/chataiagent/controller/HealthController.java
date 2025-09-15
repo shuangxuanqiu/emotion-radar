@@ -9,12 +9,10 @@ import cn.chat.ggy.chataiagent.chatmemory.RedisChatMemory;
 import cn.chat.ggy.chataiagent.exception.ErrorCode;
 import cn.chat.ggy.chataiagent.exception.ThrowUtils;
 import cn.chat.ggy.chataiagent.monitor.MonitorContextHolder;
-import cn.chat.ggy.chataiagent.service.ChatAIAssistant;
-import cn.chat.ggy.chataiagent.service.CacheService;
-import cn.chat.ggy.chataiagent.service.ChatSessionManagementService;
-import cn.chat.ggy.chataiagent.service.FeedbackMessageService;
+import cn.chat.ggy.chataiagent.service.*;
 import cn.hutool.core.util.RandomUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/chat-ai")
-@Tag(name = "情感雷达核心服务")
+@Tag(name = "情感雷达核心服务", description = "提供图片情感分析、聊天对话、系统监控和健康检查等核心功能接口")
 @Slf4j
 public class HealthController {
     @Resource
@@ -51,7 +49,8 @@ public class HealthController {
     private CacheService cacheService;
     @Resource
     private ChatSessionManagementService chatSessionManagementService;
-
+    @Resource
+    private ChatContentService chatContentService;
 
     /**
      * 返回一个的内容是 json 格式
@@ -61,11 +60,13 @@ public class HealthController {
      * @throws IOException
      */
     @PostMapping(value = "/is-json", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "返回一个的内容是 json 格式")
-    public ResultInfo resuleJson(@RequestParam("file") MultipartFile file, @RequestParam("emotionalIndex") Long emotionalIndex) throws IOException {
+    @Operation(summary = "图片情感分析(JSON格式)", description = "上传图片进行AI情感分析，返回JSON格式的分析结果")
+    public ResultInfo resuleJson(
+            @Parameter(description = "上传的图片文件", required = true) @RequestParam("file") MultipartFile file, 
+            @Parameter(description = "情感指数参数", required = true, example = "5") @RequestParam("emotionalIndex") Long emotionalIndex) throws IOException {
         long startTime = System.currentTimeMillis();
         String chatId = RandomUtil.randomString(6);
-        ResultInfo resultInfo = chatAIAssistant.chatHelpMe("请分析这张图片的内容", file, emotionalIndex, chatId);
+        ResultInfo resultInfo = chatAIAssistant.chatHelpMe("请分析这张图片的内容", file, emotionalIndex,"", chatId);
         long endTime = System.currentTimeMillis();
         log.info("方法 resuleJson 执行耗时: {} ms, chatId: {}", endTime - startTime, chatId);
         return resultInfo;
@@ -76,7 +77,9 @@ public class HealthController {
      * @param vo
      */
     @PostMapping("/chat/user/feedback")
-    public void userFeedback(@Valid @RequestBody FeedbackMessageVO vo) {
+    @Operation(summary = "用户反馈提交", description = "接收并存储用户对AI分析结果的反馈信息")
+    public void userFeedback(
+            @Parameter(description = "用户反馈信息对象", required = true) @Valid @RequestBody FeedbackMessageVO vo) {
         // 安全获取ResultStructure的详细信息
         String resultStructureInfo = "null";
         if (vo.getResultStructure() != null) {
@@ -100,7 +103,12 @@ public class HealthController {
      * @throws IOException
      */
     @PostMapping(value = "/emotion-radar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.TEXT_HTML_VALUE)
-    public String resultNoJson(@RequestParam("file") MultipartFile file, @RequestParam("emotionalIndex") Long emotionalIndex) throws IOException {
+    @Operation(summary = "情感雷达核心服务", description = "上传图片进行AI情感分析，生成HTML格式的可视化分析报告")
+    public String resultNoJson(
+            @Parameter(description = "上传的图片文件", required = true) @RequestParam("file") MultipartFile file, 
+            @Parameter(description = "情感指数参数", required = true, example = "5") @RequestParam("emotionalIndex") Long emotionalIndex,
+            @Parameter(description = "聊天背景",required = true) @RequestParam("conversationScene") String conversationScene
+            ) throws IOException {
         long startTime = System.currentTimeMillis();
         String chatId = RandomUtil.randomString(6);
         // 文件验证优化
@@ -117,14 +125,15 @@ public class HealthController {
             //将会话 id 放到ThreadLocal 中
             MonitorContextHolder.setContext("chatId",chatId);
             //核心内容，ai 解析
-            ResultInfo resultInfo = chatAIAssistant.chatHelpMe("请分析这张图片的内容", file, emotionalIndex, chatId);
+            ResultInfo resultInfo = chatAIAssistant.chatHelpMe("请分析这张图片的内容", file, emotionalIndex, conversationScene,chatId);
 
             //制作 html 文件
-            String result = chatAIAssistant.htmlStorage(resultInfo, chatId);
-
+            String resultUrl = chatAIAssistant.htmlStorage(resultInfo, chatId);
+            // 异步保存聊天内容到数据库（不阻塞接口返回）
+            chatContentService.saveChatContentAsync(resultInfo,chatId,resultUrl, null);
             long endTime = System.currentTimeMillis();
-            log.info("方法 resultNoJson 执行成功 - 耗时: {} ms, chatId: {}, 结果URL: {}", endTime - startTime, chatId, result);
-            return result;
+            log.info("方法 resultNoJson 执行成功 - 耗时: {} ms, chatId: {}, 结果URL: {}", endTime - startTime, chatId, resultUrl);
+            return resultUrl;
 
         } catch (Exception e) {
             long endTime = System.currentTimeMillis();
@@ -144,7 +153,9 @@ public class HealthController {
      * @return 停止结果
      */
     @PostMapping(value = "/travel_guide/chat/stop")
-    public ResponseEntity<Map<String, Object>> stopChat(@RequestParam String chatId) {
+    @Operation(summary = "停止AI对话", description = "强制停止指定会话的AI回答，释放相关资源")
+    public ResponseEntity<Map<String, Object>> stopChat(
+            @Parameter(description = "聊天会话ID", required = true, example = "abc123") @RequestParam String chatId) {
         try {
             Map<String, Object> result = chatSessionManagementService.stopChatSession(chatId);
             boolean success = (Boolean) result.get("success");
@@ -169,7 +180,10 @@ public class HealthController {
     }
 
     @GetMapping(value = "/travel_guide/chat/sse/emitter")
-    public SseEmitter doChatWithLoveAppSseEmitter(String message, String chatId) {
+    @Operation(summary = "SSE流式对话", description = "建立SSE连接，实现AI流式对话功能")
+    public SseEmitter doChatWithLoveAppSseEmitter(
+            @Parameter(description = "用户消息内容", required = true, example = "你好") String message, 
+            @Parameter(description = "聊天会话ID", required = true, example = "abc123") String chatId) {
         //创建一个超时时间较长的 SseEmitter
         SseEmitter emitter = new SseEmitter(180000L);//3分钟超时
 
@@ -212,7 +226,9 @@ public class HealthController {
     }
 
     @GetMapping(value = "/chat/memory/redis")
-    public List<Message> getRedisChatMemoryList(String chatId) {
+    @Operation(summary = "获取聊天记录", description = "从Redis中获取指定会话的聊天记录")
+    public List<Message> getRedisChatMemoryList(
+            @Parameter(description = "聊天会话ID", required = true, example = "abc123") String chatId) {
         return new RedisChatMemory(redisTemplate).findByConversationId(chatId);
     }
 
@@ -220,6 +236,7 @@ public class HealthController {
      * 获取缓存统计信息
      */
     @GetMapping(value = "/cache/stats")
+    @Operation(summary = "获取缓存统计", description = "获取系统缓存的统计信息，包括命中率、大小等")
     public String getCacheStats() {
         return cacheService.getCacheStats();
     }
@@ -228,6 +245,7 @@ public class HealthController {
      * 清空所有缓存
      */
     @PostMapping(value = "/cache/clear")
+    @Operation(summary = "清空缓存", description = "清空系统中所有缓存数据")
     public String clearCache() {
         try {
             cacheService.clearAllCache();
@@ -242,6 +260,7 @@ public class HealthController {
      * 系统健康检查
      */
     @GetMapping(value = "/health")
+    @Operation(summary = "系统健康检查", description = "获取系统运行状态信息，包括缓存状态、活跃连接数等")
     public Map<String, Object> healthCheck() {
         Map<String, Object> health = new ConcurrentHashMap<>();
         health.put("status", "UP");
@@ -257,6 +276,7 @@ public class HealthController {
      * 获取活跃聊天统计
      */
     @GetMapping(value = "/chat/active/stats")
+    @Operation(summary = "获取活跃聊天统计", description = "获取当前活跃聊天会话的统计信息")
     public Map<String, Object> getActiveChatStats() {
         return chatSessionManagementService.getActiveSessionStats();
     }
@@ -265,6 +285,7 @@ public class HealthController {
      * 强制清理所有活跃连接（管理员功能）
      */
     @PostMapping(value = "/chat/cleanup/all")
+    @Operation(summary = "清理所有活跃连接", description = "管理员功能：强制清理所有活跃的聊天连接和相关资源")
     public ResponseEntity<Map<String, Object>> cleanupAllActiveChats() {
         try {
             Map<String, Object> result = chatSessionManagementService.cleanupAllActiveSessions();
