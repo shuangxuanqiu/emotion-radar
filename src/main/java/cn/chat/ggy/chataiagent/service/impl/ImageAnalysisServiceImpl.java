@@ -1,8 +1,12 @@
 package cn.chat.ggy.chataiagent.service.impl;
 
 import cn.chat.ggy.chataiagent.Constant.FileConstant;
+import cn.chat.ggy.chataiagent.exception.BusinessException;
+import cn.chat.ggy.chataiagent.exception.ErrorCode;
+import cn.chat.ggy.chataiagent.model.dto.imageanalysis.ImageAnalysisQueryRequest;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import cn.chat.ggy.chataiagent.entity.ImageAnalysis;
+import cn.chat.ggy.chataiagent.model.entity.ImageAnalysis;
 import cn.chat.ggy.chataiagent.mapper.ImageAnalysisMapper;
 import cn.chat.ggy.chataiagent.service.ImageAnalysisService;
 import lombok.extern.slf4j.Slf4j;
@@ -154,5 +158,25 @@ public class ImageAnalysisServiceImpl extends ServiceImpl<ImageAnalysisMapper, I
             log.error("获取图片资源失败: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    /**
+     * 获取 QueryWrapper
+     * @param imageAnalysisQueryRequest
+     * @return
+     */
+    @Override
+    public QueryWrapper getQueryWrapper(ImageAnalysisQueryRequest imageAnalysisQueryRequest) {
+        if (imageAnalysisQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Long id = imageAnalysisQueryRequest.getId();
+        String chatId = imageAnalysisQueryRequest.getChatId();
+        String sortField = imageAnalysisQueryRequest.getSortField();
+        String sortOrder = imageAnalysisQueryRequest.getSortOrder();
+        return QueryWrapper.create()
+                .eq("id", id)
+                .eq("chatId", chatId)
+                .orderBy(sortField, "ascend".equals(sortOrder));
     }
 }

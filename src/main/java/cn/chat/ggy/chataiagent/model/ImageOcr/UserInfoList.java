@@ -1,6 +1,5 @@
-package cn.chat.ggy.chataiagent.DTO.ImageOcr;
+package cn.chat.ggy.chataiagent.model.ImageOcr;
 
-import cn.chat.ggy.chataiagent.DTO.ResultStructure;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

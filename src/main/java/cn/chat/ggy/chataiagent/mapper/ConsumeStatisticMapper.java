@@ -1,7 +1,7 @@
 package cn.chat.ggy.chataiagent.mapper;
 
 import com.mybatisflex.core.BaseMapper;
-import cn.chat.ggy.chataiagent.entity.ConsumeStatistic;
+import cn.chat.ggy.chataiagent.model.entity.ConsumeStatistic;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

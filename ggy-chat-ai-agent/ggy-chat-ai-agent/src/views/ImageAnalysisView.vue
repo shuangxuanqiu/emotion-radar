@@ -231,25 +231,51 @@ const columns: TableColumnsType = [
 const loadData = async () => {
     loading.value = true
     try {
-        const params = {
-            page: {
-                pageNumber: pagination.current,
+        // 检查是否有搜索参数
+        const hasSearchParams = searchForm.chatId || searchForm.userId !== undefined
+
+        let response: any
+
+        if (hasSearchParams) {
+            // 有参数时使用新接口 listImageAnalysisByPage (POST方法)
+            const params: API.ImageAnalysisQueryRequest = {
+                pageNum: pagination.current,
                 pageSize: pagination.pageSize,
-                ...searchForm
+                chatId: searchForm.chatId || undefined,
+                userId: searchForm.userId
             }
-        }
 
-        console.log('图片解析-发送的参数:', params)
-        const response = await api.tupianjiexiguanli.page(params)
-        console.log('图片解析-API完整响应:', response)
+            console.log('图片解析-使用新接口-发送的参数:', params)
+            response = await api.tupianjiexiguanli.listImageAnalysisByPage(params)
+            console.log('图片解析-新接口-API完整响应:', response)
 
-        if (response && response.data) {
-            console.log('图片解析-响应数据:', response.data)
-            dataSource.value = response.data.records || []
-            pagination.total = response.data.totalRow || 0
+            if (response && response.data && response.data.data) {
+                console.log('图片解析-新接口-响应数据:', response.data.data)
+                dataSource.value = response.data.data.records || []
+                pagination.total = response.data.data.totalRow || 0
+            } else {
+                console.warn('图片解析-新接口-响应数据格式异常:', response)
+                message.warning('响应数据格式异常')
+            }
         } else {
-            console.warn('图片解析-响应数据格式异常:', response)
-            message.warning('响应数据格式异常')
+            // 无参数时使用老接口 list (GET方法，获取所有数据)
+            console.log('图片解析-使用老接口-无参数查询')
+            response = await api.tupianjiexiguanli.list()
+            console.log('图片解析-老接口-API完整响应:', response)
+
+            if (response && response.data) {
+                console.log('图片解析-老接口-响应数据:', response.data)
+                const allData = response.data || []
+                
+                // 手动实现分页逻辑
+                const startIndex = (pagination.current - 1) * pagination.pageSize
+                const endIndex = startIndex + pagination.pageSize
+                dataSource.value = allData.slice(startIndex, endIndex)
+                pagination.total = allData.length
+            } else {
+                console.warn('图片解析-老接口-响应数据格式异常:', response)
+                message.warning('响应数据格式异常')
+            }
         }
     } catch (error) {
         console.error('图片解析-加载数据失败:', error)

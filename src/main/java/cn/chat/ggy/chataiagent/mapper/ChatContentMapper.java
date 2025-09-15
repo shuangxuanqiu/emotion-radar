@@ -1,7 +1,7 @@
 package cn.chat.ggy.chataiagent.mapper;
 
 import com.mybatisflex.core.BaseMapper;
-import cn.chat.ggy.chataiagent.entity.ChatContent;
+import cn.chat.ggy.chataiagent.model.entity.ChatContent;
 
 /**
  * 对话内容表 映射层。

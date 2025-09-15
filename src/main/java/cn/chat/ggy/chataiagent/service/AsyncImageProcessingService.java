@@ -1,6 +1,6 @@
 package cn.chat.ggy.chataiagent.service;
 
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.concurrent.CompletableFuture;

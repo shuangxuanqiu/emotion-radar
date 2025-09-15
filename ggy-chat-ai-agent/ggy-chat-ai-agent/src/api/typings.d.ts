@@ -1,4 +1,22 @@
 declare namespace API {
+  type BaseResponsePageChatContent = {
+    code?: number
+    data?: PageChatContent
+    message?: string
+  }
+
+  type BaseResponsePageFeedbackMessage = {
+    code?: number
+    data?: PageFeedbackMessage
+    message?: string
+  }
+
+  type BaseResponsePageImageAnalysis = {
+    code?: number
+    data?: PageImageAnalysis
+    message?: string
+  }
+
   type ChatBackgroundAnalysis = {
     /** 关系类型 */
     relationshipType?: string
@@ -14,14 +32,23 @@ declare namespace API {
     id?: number
     userId?: number
     chatId?: string
+    resultUrl?: string
     tokenQuantity?: number
     resultContent?: string
     choiceContent?: string
-    resultUrl?: string
     editTime?: string
     createTime?: string
     updateTime?: string
     isDelete?: number
+  }
+
+  type ChatContentQueryRequest = {
+    pageNum?: number
+    pageSize?: number
+    sortField?: string
+    sortOrder?: string
+    id?: number
+    chatId?: string
   }
 
   type ConsumeStatistic = {
@@ -64,6 +91,16 @@ declare namespace API {
     feedBackMessage?: string
     resultStructure?: FeedbackResultStructure
     /** 用户选择类型，0正常复制，1不满意反馈 */
+    messageType?: number
+  }
+
+  type FeedbackQueryRequest = {
+    pageNum?: number
+    pageSize?: number
+    sortField?: string
+    sortOrder?: string
+    id?: number
+    chatId?: string
     messageType?: number
   }
 
@@ -114,6 +151,15 @@ declare namespace API {
     createTime?: string
     updateTime?: string
     isDelete?: number
+  }
+
+  type ImageAnalysisQueryRequest = {
+    pageNum?: number
+    pageSize?: number
+    sortField?: string
+    sortOrder?: string
+    id?: number
+    chatId?: string
   }
 
   type Message = {
@@ -216,6 +262,8 @@ declare namespace API {
   type resultNoJsonParams = {
     /** 情感指数参数 */
     emotionalIndex: number
+    /** 聊天背景 */
+    conversationScene: string
   }
 
   type ResultStructure = {

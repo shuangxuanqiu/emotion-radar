@@ -1,9 +1,15 @@
 package cn.chat.ggy.chataiagent.controller;
 
 
-import cn.chat.ggy.chataiagent.entity.FeedbackMessage;
+import cn.chat.ggy.chataiagent.common.BaseResponse;
+import cn.chat.ggy.chataiagent.common.ResultUtils;
+import cn.chat.ggy.chataiagent.model.dto.feedback.FeedbackQueryRequest;
+import cn.chat.ggy.chataiagent.model.entity.FeedbackMessage;
+import cn.chat.ggy.chataiagent.exception.ErrorCode;
+import cn.chat.ggy.chataiagent.exception.ThrowUtils;
 import cn.chat.ggy.chataiagent.service.FeedbackMessageService;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -94,6 +100,23 @@ public class FeedbackMessageController {
     @Operation(summary = "分页查询用户反馈", description = "根据分页参数查询用户反馈列表")
     public Page<FeedbackMessage> page(@Parameter(description = "分页查询参数", required = true) Page<FeedbackMessage> page) {
         return feedbackMessageService.page(page);
+
+    }
+
+    /**
+     * 分页 参数 查询生成内容反馈表
+     *
+     * @param feedbackMessage 查询请求参数
+     */
+    @PostMapping("/list/page/vo")
+    @Operation(summary = "分页 参数 查询用户反馈", description = "根据分页参数查询用户反馈列表")
+    public BaseResponse<Page<FeedbackMessage>> listUserVOByPage(@RequestBody FeedbackQueryRequest feedbackMessage) {
+        ThrowUtils.throwIf(feedbackMessage == null, ErrorCode.PARAMS_ERROR);
+        long pageNum = feedbackMessage.getPageNum();
+        long pageSize = feedbackMessage.getPageSize();
+        Page<FeedbackMessage> userPage = feedbackMessageService.page(Page.of(pageNum, pageSize),
+                feedbackMessageService.getQueryWrapper(feedbackMessage));
+        return ResultUtils.success(userPage);
     }
 
 }

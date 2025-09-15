@@ -6,7 +6,7 @@ import request from '@/request'
 export async function getInfo3(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.getInfo3Params,
-  options?: { [key: string]: any },
+  options?: { [key: string]: any }
 ) {
   const { id: param0, ...queryParams } = params
   return request<API.ChatContent>(`/chatContent/getInfo/${param0}`, {
@@ -24,11 +24,26 @@ export async function list3(options?: { [key: string]: any }) {
   })
 }
 
+/** 分页 参数 查询对话内容 根据分页参数和chatId查询对话内容列表 POST /chatContent/list/page/vo */
+export async function listChatContentByPage(
+  body: API.ChatContentQueryRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponsePageChatContent>('/chatContent/list/page/vo', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** 分页查询对话内容 根据分页参数查询对话内容列表 GET /chatContent/page */
 export async function page3(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.page3Params,
-  options?: { [key: string]: any },
+  options?: { [key: string]: any }
 ) {
   return request<API.PageChatContent>('/chatContent/page', {
     method: 'GET',
@@ -45,7 +60,7 @@ export async function page3(
 export async function remove3(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.remove3Params,
-  options?: { [key: string]: any },
+  options?: { [key: string]: any }
 ) {
   const { id: param0, ...queryParams } = params
   return request<boolean>(`/chatContent/remove/${param0}`, {

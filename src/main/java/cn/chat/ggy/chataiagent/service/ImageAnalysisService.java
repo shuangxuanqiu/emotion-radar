@@ -1,10 +1,11 @@
 package cn.chat.ggy.chataiagent.service;
 
+import cn.chat.ggy.chataiagent.model.dto.imageanalysis.ImageAnalysisQueryRequest;
 import com.mybatisflex.core.service.IService;
-import cn.chat.ggy.chataiagent.entity.ImageAnalysis;
+import com.mybatisflex.core.query.QueryWrapper;
+import cn.chat.ggy.chataiagent.model.entity.ImageAnalysis;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -29,4 +30,6 @@ public interface ImageAnalysisService extends IService<ImageAnalysis> {
      * @return 图片资源响应
      */
     ResponseEntity<Resource> getImageResource(String imagePath);
+
+    QueryWrapper getQueryWrapper(ImageAnalysisQueryRequest imageAnalysisQueryRequest);
 }

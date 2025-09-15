@@ -1,37 +1,25 @@
 package cn.chat.ggy.chataiagent.service.impl;
 
 import cn.chat.ggy.chataiagent.Constant.AppConstant;
-import cn.chat.ggy.chataiagent.Constant.FileConstant;
-import cn.chat.ggy.chataiagent.DTO.ImageOcr.UserInfoList;
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
-import cn.chat.ggy.chataiagent.DTO.saver.HtmlCodeResult;
+import cn.chat.ggy.chataiagent.model.ImageOcr.UserInfoList;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
+import cn.chat.ggy.chataiagent.model.saver.HtmlCodeResult;
 import cn.chat.ggy.chataiagent.app.ChatBotApp;
 import cn.chat.ggy.chataiagent.app.ImageAnalysisAPP;
 import cn.chat.ggy.chataiagent.core.saver.HtmlCodeFileSaverTemplate;
 import cn.chat.ggy.chataiagent.core.HtmlTemplateOptimizer;
-import cn.chat.ggy.chataiagent.entity.ChatContent;
-import cn.chat.ggy.chataiagent.entity.ImageAnalysis;
 import cn.chat.ggy.chataiagent.exception.BusinessException;
 import cn.chat.ggy.chataiagent.exception.ErrorCode;
 import cn.chat.ggy.chataiagent.service.ChatAIAssistant;
-import cn.chat.ggy.chataiagent.service.ChatContentService;
 import cn.chat.ggy.chataiagent.service.ImageAnalysisService;
 import cn.chat.ggy.chataiagent.service.CacheService;
 import cn.hutool.json.JSONUtil;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.UUID;
 
 @Slf4j
 @Service

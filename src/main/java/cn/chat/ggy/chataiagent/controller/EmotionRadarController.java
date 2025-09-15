@@ -1,10 +1,9 @@
 package cn.chat.ggy.chataiagent.controller;
 
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 
-import cn.chat.ggy.chataiagent.DTO.VO.FeedbackMessageVO;
+import cn.chat.ggy.chataiagent.model.VO.FeedbackMessageVO;
 import cn.chat.ggy.chataiagent.app.ChatBasicsApp;
-import cn.chat.ggy.chataiagent.app.ChatBotApp;
 import cn.chat.ggy.chataiagent.chatmemory.RedisChatMemory;
 import cn.chat.ggy.chataiagent.exception.ErrorCode;
 import cn.chat.ggy.chataiagent.exception.ThrowUtils;
@@ -36,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/chat-ai")
 @Tag(name = "情感雷达核心服务", description = "提供图片情感分析、聊天对话、系统监控和健康检查等核心功能接口")
 @Slf4j
-public class HealthController {
+public class EmotionRadarController {
     @Resource
     private ChatAIAssistant chatAIAssistant;
     @Resource

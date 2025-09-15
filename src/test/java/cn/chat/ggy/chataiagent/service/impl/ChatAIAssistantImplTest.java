@@ -1,7 +1,7 @@
 package cn.chat.ggy.chataiagent.service.impl;
 
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
-import cn.chat.ggy.chataiagent.DTO.ResultStructure;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultStructure;
 import cn.chat.ggy.chataiagent.service.ChatAIAssistant;
 import cn.hutool.core.util.RandomUtil;
 import jakarta.annotation.Resource;

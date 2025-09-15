@@ -1,4 +1,4 @@
-package cn.chat.ggy.chataiagent.entity;
+package cn.chat.ggy.chataiagent.model.entity;
 
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 图片解析信息表 实体类。
+ * 对话内容表 实体类。
  *
  * @author 来自小扬 (＾▽＾)／
  */
@@ -23,8 +23,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("image_analysis")
-public class ImageAnalysis implements Serializable {
+@Table("chat_content")
+public class ChatContent implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -34,22 +34,22 @@ public class ImageAnalysis implements Serializable {
      */
     @Id(keyType = KeyType.Auto)
     private Long id;
+
+    /**
+     * 创建用户id
+     */
+    @Column("userId")
+    private Long userId;
     /**
      * 房间 id
      */
     @Column("chatId")
     private String chatId;
     /**
-     * 图片内容
+     * 生成的 html 文件地址
      */
-    @Column("imageTxt")
-    private String imageTxt;
-
-    /**
-     * 文件路径
-     */
-    @Column("imagePath")
-    private String imagePath;
+    @Column("resultUrl")
+    private String resultUrl;
 
     /**
      * token 数量
@@ -58,10 +58,16 @@ public class ImageAnalysis implements Serializable {
     private Long tokenQuantity;
 
     /**
-     * 创建用户id
+     * 返回的内容
      */
-    @Column("userId")
-    private Long userId;
+    @Column("resultContent")
+    private String resultContent;
+
+    /**
+     * 用户选择内容
+     */
+    @Column("choiceContent")
+    private String choiceContent;
 
     /**
      * 编辑时间

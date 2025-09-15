@@ -2,6 +2,14 @@
 /* eslint-disable */
 import request from '@/request'
 
+/** 图片展示 根据图片路径参数展示图片资源 GET /imageAnalysis/display/&#42;&#42; */
+export async function displayImage(options?: { [key: string]: any }) {
+  return request<string>('/imageAnalysis/display/**', {
+    method: 'GET',
+    ...(options || {}),
+  })
+}
+
 /** 获取图片解析信息详情 根据主键ID获取单个图片解析记录的详细信息 GET /imageAnalysis/getInfo/${param0} */
 export async function getInfo(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -20,6 +28,21 @@ export async function getInfo(
 export async function list(options?: { [key: string]: any }) {
   return request<API.ImageAnalysis[]>('/imageAnalysis/list', {
     method: 'GET',
+    ...(options || {}),
+  })
+}
+
+/** 分页 参数 查询图片解析信息 根据分页参数和chatId查询图片解析信息列表 POST /imageAnalysis/list/page/vo */
+export async function listImageAnalysisByPage(
+  body: API.ImageAnalysisQueryRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponsePageImageAnalysis>('/imageAnalysis/list/page/vo', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   })
 }

@@ -1,7 +1,7 @@
 package cn.chat.ggy.chataiagent.mapper;
 
 import com.mybatisflex.core.BaseMapper;
-import cn.chat.ggy.chataiagent.entity.ImageAnalysis;
+import cn.chat.ggy.chataiagent.model.entity.ImageAnalysis;
 
 /**
  * 图片解析信息表 映射层。

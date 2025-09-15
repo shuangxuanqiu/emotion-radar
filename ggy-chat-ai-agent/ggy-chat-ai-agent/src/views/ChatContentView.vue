@@ -280,36 +280,62 @@ const columns: TableColumnsType = [
 const loadData = async () => {
     loading.value = true
     try {
-        const params = {
-            page: {
-                pageNumber: pagination.current,
+        // 检查是否有搜索参数
+        const hasSearchParams = searchForm.chatId || searchForm.userId !== undefined
+
+        let response: any
+
+        if (hasSearchParams) {
+            // 有参数时使用新接口 listChatContentByPage (POST方法)
+            const params: API.ChatContentQueryRequest = {
+                pageNum: pagination.current,
                 pageSize: pagination.pageSize,
-                ...searchForm
+                chatId: searchForm.chatId || undefined,
+                userId: searchForm.userId
+            }
+
+            console.log('对话内容-使用新接口-发送的参数:', params)
+            response = await api.duihuaneirongguanli.listChatContentByPage(params)
+            console.log('对话内容-新接口-API完整响应:', response)
+
+            if (response && response.data && response.data.data) {
+                console.log('对话内容-新接口-响应数据:', response.data.data)
+                dataSource.value = response.data.data.records || []
+                pagination.total = response.data.data.totalRow || 0
+            } else {
+                console.warn('对话内容-新接口-响应数据格式异常:', response)
+                message.warning('响应数据格式异常')
+            }
+        } else {
+            // 无参数时使用老接口 list3 (GET方法，获取所有数据)
+            console.log('对话内容-使用老接口-无参数查询')
+            response = await api.duihuaneirongguanli.list3()
+            console.log('对话内容-老接口-API完整响应:', response)
+
+            if (response && response.data) {
+                console.log('对话内容-老接口-响应数据:', response.data)
+                const allData = response.data || []
+                
+                // 手动实现分页逻辑
+                const startIndex = (pagination.current - 1) * pagination.pageSize
+                const endIndex = startIndex + pagination.pageSize
+                dataSource.value = allData.slice(startIndex, endIndex)
+                pagination.total = allData.length
+            } else {
+                console.warn('对话内容-老接口-响应数据格式异常:', response)
+                message.warning('响应数据格式异常')
             }
         }
-
-        console.log('发送的参数:', params)
-        const response = await api.duihuaneirongguanli.page3(params)
-        console.log('API完整响应:', response)
-
-        if (response && response.data) {
-            console.log('响应数据:', response.data)
-            dataSource.value = response.data.records || []
-            pagination.total = response.data.totalRow || 0
-        } else {
-            console.warn('响应数据格式异常:', response)
-            message.warning('响应数据格式异常')
-        }
     } catch (error) {
-        console.error('加载数据失败:', error)
+        console.error('对话内容-加载数据失败:', error)
         if (error.response) {
-            console.error('错误响应:', error.response)
+            console.error('对话内容-错误响应:', error.response)
             message.error(`服务器错误: ${error.response.status} - ${error.response.statusText}`)
         } else if (error.request) {
-            console.error('网络错误:', error.request)
+            console.error('对话内容-网络错误:', error.request)
             message.error('网络连接失败，请检查网络或后端服务')
         } else {
-            console.error('其他错误:', error.message)
+            console.error('对话内容-其他错误:', error.message)
             message.error(`请求失败: ${error.message}`)
         }
     } finally {

@@ -1,6 +1,6 @@
-package cn.chat.ggy.chataiagent.DTO.VO;
+package cn.chat.ggy.chataiagent.model.VO;
 
-import cn.chat.ggy.chataiagent.DTO.FeedbackResultStructure;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.FeedbackResultStructure;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 

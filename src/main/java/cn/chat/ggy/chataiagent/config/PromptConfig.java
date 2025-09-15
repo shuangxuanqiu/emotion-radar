@@ -35,4 +35,14 @@ public class PromptConfig {
             throw new RuntimeException("Failed to load chat criterion prompt", e);
         }
     }
+
+    @Bean(name="promptImageAnalysis")
+    public String promptImageAnalysis() {
+        try {
+            ClassPathResource resource = new ClassPathResource("prompt/image-analysis.txt");
+            return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load image analysis prompt", e);
+        }
+    }
 }

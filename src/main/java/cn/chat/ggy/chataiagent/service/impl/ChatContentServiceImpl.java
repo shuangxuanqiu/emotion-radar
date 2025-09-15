@@ -1,9 +1,13 @@
 package cn.chat.ggy.chataiagent.service.impl;
 
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
+import cn.chat.ggy.chataiagent.exception.BusinessException;
+import cn.chat.ggy.chataiagent.exception.ErrorCode;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
+import cn.chat.ggy.chataiagent.model.dto.chatcontent.ChatContentQueryRequest;
 import cn.hutool.json.JSONUtil;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import cn.chat.ggy.chataiagent.entity.ChatContent;
+import cn.chat.ggy.chataiagent.model.entity.ChatContent;
 import cn.chat.ggy.chataiagent.mapper.ChatContentMapper;
 import cn.chat.ggy.chataiagent.service.ChatContentService;
 import lombok.extern.slf4j.Slf4j;
@@ -54,5 +58,25 @@ public class ChatContentServiceImpl extends ServiceImpl<ChatContentMapper, ChatC
         } catch (Exception e) {
             log.error("保存聊天内容到数据库失败: {}", e.getMessage(), e);
         }
+    }
+
+    /**
+     * 获取 QueryWrapper
+     * @param chatContentQueryRequest
+     * @return
+     */
+    @Override
+    public QueryWrapper getQueryWrapper(ChatContentQueryRequest chatContentQueryRequest) {
+        if (chatContentQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Long id = chatContentQueryRequest.getId();
+        String chatId = chatContentQueryRequest.getChatId();
+        String sortField = chatContentQueryRequest.getSortField();
+        String sortOrder = chatContentQueryRequest.getSortOrder();
+        return QueryWrapper.create()
+                .eq("id", id)
+                .eq("chatId", chatId)
+                .orderBy(sortField, "ascend".equals(sortOrder));
     }
 }

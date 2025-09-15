@@ -1,5 +1,10 @@
 package cn.chat.ggy.chataiagent.controller;
 
+import cn.chat.ggy.chataiagent.common.BaseResponse;
+import cn.chat.ggy.chataiagent.common.ResultUtils;
+import cn.chat.ggy.chataiagent.exception.ErrorCode;
+import cn.chat.ggy.chataiagent.exception.ThrowUtils;
+import cn.chat.ggy.chataiagent.model.dto.imageanalysis.ImageAnalysisQueryRequest;
 import com.mybatisflex.core.paginate.Page;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import cn.chat.ggy.chataiagent.entity.ImageAnalysis;
+import cn.chat.ggy.chataiagent.model.entity.ImageAnalysis;
 import cn.chat.ggy.chataiagent.service.ImageAnalysisService;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.core.io.Resource;
@@ -103,6 +108,22 @@ public class ImageAnalysisController {
     @Operation(summary = "分页查询图片解析信息", description = "根据分页参数查询图片解析信息列表")
     public Page<ImageAnalysis> page(@Parameter(description = "分页查询参数", required = true) Page<ImageAnalysis> page) {
         return imageAnalysisService.page(page);
+    }
+
+    /**
+     * 分页 参数 查询图片解析信息表
+     *
+     * @param imageAnalysisQueryRequest 查询请求参数
+     */
+    @PostMapping("/list/page/vo")
+    @Operation(summary = "分页 参数 查询图片解析信息", description = "根据分页参数和chatId查询图片解析信息列表")
+    public BaseResponse<Page<ImageAnalysis>> listImageAnalysisByPage(@RequestBody ImageAnalysisQueryRequest imageAnalysisQueryRequest) {
+        ThrowUtils.throwIf(imageAnalysisQueryRequest == null, ErrorCode.PARAMS_ERROR);
+        long pageNum = imageAnalysisQueryRequest.getPageNum();
+        long pageSize = imageAnalysisQueryRequest.getPageSize();
+        Page<ImageAnalysis> imageAnalysisPage = imageAnalysisService.page(Page.of(pageNum, pageSize),
+                imageAnalysisService.getQueryWrapper(imageAnalysisQueryRequest));
+        return ResultUtils.success(imageAnalysisPage);
     }
 
     /**

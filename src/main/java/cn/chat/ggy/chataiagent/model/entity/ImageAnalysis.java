@@ -1,4 +1,4 @@
-package cn.chat.ggy.chataiagent.entity;
+package cn.chat.ggy.chataiagent.model.entity;
 
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * token统计表 实体类。
+ * 图片解析信息表 实体类。
  *
  * @author 来自小扬 (＾▽＾)／
  */
@@ -23,8 +23,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("consume_statistic")
-public class ConsumeStatistic implements Serializable {
+@Table("image_analysis")
+public class ImageAnalysis implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -34,30 +34,28 @@ public class ConsumeStatistic implements Serializable {
      */
     @Id(keyType = KeyType.Auto)
     private Long id;
-
     /**
-     * 会话 id
+     * 房间 id
      */
     @Column("chatId")
     private String chatId;
+    /**
+     * 图片内容
+     */
+    @Column("imageTxt")
+    private String imageTxt;
 
     /**
-     * 总消耗 tokens
+     * 文件路径
      */
-    @Column("totalTokens")
-    private Long totalTokens;
+    @Column("imagePath")
+    private String imagePath;
 
     /**
-     * 提示词（输入）的 token
+     * token 数量
      */
-    @Column("promptTokens")
-    private Long promptTokens;
-
-    /**
-     * 完成任务(产出)的 token
-     */
-    @Column("completionTokens")
-    private Long completionTokens;
+    @Column("tokenQuantity")
+    private Long tokenQuantity;
 
     /**
      * 创建用户id

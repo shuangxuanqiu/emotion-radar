@@ -1,5 +1,10 @@
 package cn.chat.ggy.chataiagent.controller;
 
+import cn.chat.ggy.chataiagent.common.BaseResponse;
+import cn.chat.ggy.chataiagent.common.ResultUtils;
+import cn.chat.ggy.chataiagent.exception.ErrorCode;
+import cn.chat.ggy.chataiagent.exception.ThrowUtils;
+import cn.chat.ggy.chataiagent.model.dto.chatcontent.ChatContentQueryRequest;
 import com.mybatisflex.core.paginate.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import cn.chat.ggy.chataiagent.entity.ChatContent;
+import cn.chat.ggy.chataiagent.model.entity.ChatContent;
 import cn.chat.ggy.chataiagent.service.ChatContentService;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
@@ -99,6 +104,22 @@ public class ChatContentController {
     @Operation(summary = "分页查询对话内容", description = "根据分页参数查询对话内容列表")
     public Page<ChatContent> page(@Parameter(description = "分页查询参数", required = true) Page<ChatContent> page) {
         return chatContentService.page(page);
+    }
+
+    /**
+     * 分页 参数 查询对话内容表
+     *
+     * @param chatContentQueryRequest 查询请求参数
+     */
+    @PostMapping("/list/page/vo")
+    @Operation(summary = "分页 参数 查询对话内容", description = "根据分页参数和chatId查询对话内容列表")
+    public BaseResponse<Page<ChatContent>> listChatContentByPage(@RequestBody ChatContentQueryRequest chatContentQueryRequest) {
+        ThrowUtils.throwIf(chatContentQueryRequest == null, ErrorCode.PARAMS_ERROR);
+        long pageNum = chatContentQueryRequest.getPageNum();
+        long pageSize = chatContentQueryRequest.getPageSize();
+        Page<ChatContent> chatContentPage = chatContentService.page(Page.of(pageNum, pageSize),
+                chatContentService.getQueryWrapper(chatContentQueryRequest));
+        return ResultUtils.success(chatContentPage);
     }
 
 }

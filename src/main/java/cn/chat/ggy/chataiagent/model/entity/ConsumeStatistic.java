@@ -1,20 +1,21 @@
-package cn.chat.ggy.chataiagent.entity;
+package cn.chat.ggy.chataiagent.model.entity;
 
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+import java.io.Serial;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
- * 生成内容反馈表 实体类。
+ * token统计表 实体类。
  *
  * @author 来自小扬 (＾▽＾)／
  */
@@ -22,8 +23,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("feedback_message")
-public class FeedbackMessage implements Serializable {
+@Table("consume_statistic")
+public class ConsumeStatistic implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -41,22 +42,22 @@ public class FeedbackMessage implements Serializable {
     private String chatId;
 
     /**
-     * 用户选择类型，0正常复制，1不满意反馈
+     * 总消耗 tokens
      */
-    @Column("messageType")
-    private Integer messageType;
+    @Column("totalTokens")
+    private Long totalTokens;
 
     /**
-     * 反馈内容
+     * 提示词（输入）的 token
      */
-    @Column("feedBackMessage")
-    private String feedBackMessage;
+    @Column("promptTokens")
+    private Long promptTokens;
 
     /**
-     * 用户最终选择内容
+     * 完成任务(产出)的 token
      */
-    @Column("resultStructure")
-    private String resultStructure;
+    @Column("completionTokens")
+    private Long completionTokens;
 
     /**
      * 创建用户id

@@ -1,4 +1,4 @@
-package cn.chat.ggy.chataiagent.DTO.saver;
+package cn.chat.ggy.chataiagent.model.saver;
 
 import jdk.jfr.Description;
 import lombok.Builder;

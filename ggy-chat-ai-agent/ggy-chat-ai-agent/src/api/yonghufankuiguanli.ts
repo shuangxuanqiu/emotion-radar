@@ -24,6 +24,21 @@ export async function list1(options?: { [key: string]: any }) {
   })
 }
 
+/** 分页 参数 查询用户反馈 根据分页参数查询用户反馈列表 POST /feedbackMessage/list/page/vo */
+export async function listUserVoByPage(
+  body: API.FeedbackQueryRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponsePageFeedbackMessage>('/feedbackMessage/list/page/vo', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  })
+}
+
 /** 分页查询用户反馈 根据分页参数查询用户反馈列表 GET /feedbackMessage/page */
 export async function page1(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)

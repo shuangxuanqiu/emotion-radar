@@ -1,8 +1,8 @@
-package cn.chat.ggy.chataiagent.DTO.example;
+package cn.chat.ggy.chataiagent.model.example;
 
-import cn.chat.ggy.chataiagent.DTO.ChatBackgroundAnalysis;
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
-import cn.chat.ggy.chataiagent.DTO.ResultStructure;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ChatBackgroundAnalysis;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultStructure;
 
 import java.util.Arrays;
 import java.util.List;

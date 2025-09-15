@@ -1,4 +1,4 @@
-package cn.chat.ggy.chataiagent.DTO.ImageOcr;
+package cn.chat.ggy.chataiagent.model.ImageOcr;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

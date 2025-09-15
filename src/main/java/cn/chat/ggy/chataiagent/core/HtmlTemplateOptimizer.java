@@ -1,6 +1,6 @@
 package cn.chat.ggy.chataiagent.core;
 
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 import cn.chat.ggy.chataiagent.config.AppConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

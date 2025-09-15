@@ -1,7 +1,7 @@
 package cn.chat.ggy.chataiagent.app;
 
 
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 import cn.chat.ggy.chataiagent.advisor.MyLoggerAdvisor;
 import cn.chat.ggy.chataiagent.chatmemory.RedisChatMemory;
 import cn.chat.ggy.chataiagent.config.PromptConfig;
@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 
@@ -21,17 +20,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 @Component
 @Slf4j

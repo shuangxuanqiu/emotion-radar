@@ -1,7 +1,7 @@
 package cn.chat.ggy.chataiagent.service.impl;
 
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import cn.chat.ggy.chataiagent.entity.ConsumeStatistic;
+import cn.chat.ggy.chataiagent.model.entity.ConsumeStatistic;
 import cn.chat.ggy.chataiagent.mapper.ConsumeStatisticMapper;
 import cn.chat.ggy.chataiagent.service.ConsumeStatisticService;
 import org.springframework.ai.chat.metadata.Usage;

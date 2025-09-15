@@ -1,7 +1,7 @@
 package cn.chat.ggy.chataiagent.mapper;
 
 
-import cn.chat.ggy.chataiagent.entity.FeedbackMessage;
+import cn.chat.ggy.chataiagent.model.entity.FeedbackMessage;
 import com.mybatisflex.core.BaseMapper;
 
 /**

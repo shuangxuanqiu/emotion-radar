@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import cn.chat.ggy.chataiagent.entity.ConsumeStatistic;
+import cn.chat.ggy.chataiagent.model.entity.ConsumeStatistic;
 import cn.chat.ggy.chataiagent.service.ConsumeStatisticService;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;

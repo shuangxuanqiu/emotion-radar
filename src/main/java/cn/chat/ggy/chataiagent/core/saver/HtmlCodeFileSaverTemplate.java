@@ -1,6 +1,6 @@
 package cn.chat.ggy.chataiagent.core.saver;
 
-import cn.chat.ggy.chataiagent.DTO.saver.HtmlCodeResult;
+import cn.chat.ggy.chataiagent.model.saver.HtmlCodeResult;
 import cn.chat.ggy.chataiagent.core.CodeFileSaverTemplate;
 import cn.chat.ggy.chataiagent.exception.BusinessException;
 import cn.chat.ggy.chataiagent.exception.ErrorCode;

@@ -1,6 +1,6 @@
 package cn.chat.ggy.chataiagent.service.impl;
 
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 import cn.chat.ggy.chataiagent.service.CacheService;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;

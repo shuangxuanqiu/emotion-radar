@@ -266,25 +266,54 @@ const columns: TableColumnsType = [
 const loadData = async () => {
     loading.value = true
     try {
-        const params = {
-            page: {
-                pageNumber: pagination.current,
+        // 检查是否有搜索参数
+        const hasSearchParams = searchForm.chatId || 
+                               searchForm.messageType !== undefined || 
+                               searchForm.userId !== undefined
+
+        let response: any
+
+        if (hasSearchParams) {
+            // 有参数时使用新接口 listUserVoByPage (POST方法)
+            const params: API.FeedbackQueryRequest = {
+                pageNum: pagination.current,
                 pageSize: pagination.pageSize,
-                ...searchForm
+                chatId: searchForm.chatId || undefined,
+                messageType: searchForm.messageType,
+                userId: searchForm.userId
             }
-        }
 
-        console.log('用户反馈-发送的参数:', params)
-        const response = await api.yonghufankuiguanli.page1(params)
-        console.log('用户反馈-API完整响应:', response)
+            console.log('用户反馈-使用新接口-发送的参数:', params)
+            response = await api.yonghufankuiguanli.listUserVoByPage(params)
+            console.log('用户反馈-新接口-API完整响应:', response)
 
-        if (response && response.data) {
-            console.log('用户反馈-响应数据:', response.data)
-            dataSource.value = response.data.records || []
-            pagination.total = response.data.totalRow || 0
+            if (response && response.data && response.data.data) {
+                console.log('用户反馈-新接口-响应数据:', response.data.data)
+                dataSource.value = response.data.data.records || []
+                pagination.total = response.data.data.totalRow || 0
+            } else {
+                console.warn('用户反馈-新接口-响应数据格式异常:', response)
+                message.warning('响应数据格式异常')
+            }
         } else {
-            console.warn('用户反馈-响应数据格式异常:', response)
-            message.warning('响应数据格式异常')
+            // 无参数时使用老接口 list1 (GET方法，获取所有数据)
+            console.log('用户反馈-使用老接口-无参数查询')
+            response = await api.yonghufankuiguanli.list1()
+            console.log('用户反馈-老接口-API完整响应:', response)
+
+            if (response && response.data) {
+                console.log('用户反馈-老接口-响应数据:', response.data)
+                const allData = response.data || []
+                
+                // 手动实现分页逻辑
+                const startIndex = (pagination.current - 1) * pagination.pageSize
+                const endIndex = startIndex + pagination.pageSize
+                dataSource.value = allData.slice(startIndex, endIndex)
+                pagination.total = allData.length
+            } else {
+                console.warn('用户反馈-老接口-响应数据格式异常:', response)
+                message.warning('响应数据格式异常')
+            }
         }
     } catch (error) {
         console.error('用户反馈-加载数据失败:', error)

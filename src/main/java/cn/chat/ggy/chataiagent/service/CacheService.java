@@ -1,6 +1,6 @@
 package cn.chat.ggy.chataiagent.service;
 
-import cn.chat.ggy.chataiagent.DTO.ResultInfo;
+import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 
 /**
  * 缓存服务接口

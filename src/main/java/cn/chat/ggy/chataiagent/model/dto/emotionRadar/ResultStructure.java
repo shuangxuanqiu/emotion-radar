@@ -1,4 +1,4 @@
-package cn.chat.ggy.chataiagent.DTO;
+package cn.chat.ggy.chataiagent.model.dto.emotionRadar;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

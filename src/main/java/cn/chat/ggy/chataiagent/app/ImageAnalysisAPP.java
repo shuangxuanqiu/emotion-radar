@@ -1,6 +1,6 @@
 package cn.chat.ggy.chataiagent.app;
 
-import cn.chat.ggy.chataiagent.DTO.ImageOcr.UserInfoList;
+import cn.chat.ggy.chataiagent.model.ImageOcr.UserInfoList;
 import cn.chat.ggy.chataiagent.advisor.MyLoggerAdvisor;
 import cn.chat.ggy.chataiagent.chatmemory.RedisChatMemory;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
@@ -9,15 +9,11 @@ import com.alibaba.cloud.ai.dashscope.common.DashScopeApiConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.content.Media;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -32,39 +29,27 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 @Component
 @Slf4j
 public class ImageAnalysisAPP {
     private final ChatClient chatClient;
+    private final String systemPrompt;
     
     @Value("${spring.ai.dashscope.chat-vl.options.model}")
     private String imageAnalysisModel;
-    private final String SYSTEM_PROMPT = """
-            请分析提供的聊天界面截图，并按以下规则提取对话内容：
-            1.
-            对话分割规则：
-            以头像图像为区分依据：左侧出现的所有消息（无论内容形式）均属于对方发送的消息
-            右侧出现的所有消息（无论内容形式）均属于用户自己发送的消息
-            确保按时间顺序从上到下提取对话内容
-            2.
-            输出格式要求
-            我自己的用户名称要用“我”
-            3.
-            内容处理规范：
-            提取所有文字消息内容（包括表情符号的文字表示，如[笑脸]）
-            忽略纯图片/文件传输等非文本内容（当消息仅为图片或文件时，对应消息内容输出空字符串）
-            保留消息中的换行符和标点符号
-            如遇到消息撤回提示，按实际显示的文本内容提取 """;
 
     /**
      * 图片解析的 chatclient
      * @param dashscopeChatModel
      * @param redisTemplate
+     * @param promptImageAnalysis 图片分析提示词
      */
-    public ImageAnalysisAPP(ChatModel dashscopeChatModel, RedisTemplate<String,Object> redisTemplate) {
+    public ImageAnalysisAPP(ChatModel dashscopeChatModel, 
+                           RedisTemplate<String,Object> redisTemplate,
+                           @Qualifier("promptImageAnalysis") String promptImageAnalysis) {
+        this.systemPrompt = promptImageAnalysis;
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(new RedisChatMemory(redisTemplate))
                 .maxMessages(2)
@@ -72,7 +57,7 @@ public class ImageAnalysisAPP {
         //初始化构建
         chatClient =  ChatClient.builder(dashscopeChatModel)
                 //引入系统提示词
-                .defaultSystem(SYSTEM_PROMPT)
+                .defaultSystem(systemPrompt)
                 //顾问，拦截器
                 .defaultAdvisors(
                         //上下文回答的保存机制

@@ -1,8 +1,10 @@
 package cn.chat.ggy.chataiagent.service;
 
 
-import cn.chat.ggy.chataiagent.DTO.VO.FeedbackMessageVO;
-import cn.chat.ggy.chataiagent.entity.FeedbackMessage;
+import cn.chat.ggy.chataiagent.model.VO.FeedbackMessageVO;
+import cn.chat.ggy.chataiagent.model.dto.feedback.FeedbackQueryRequest;
+import cn.chat.ggy.chataiagent.model.entity.FeedbackMessage;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
 
 /**
@@ -13,4 +15,6 @@ import com.mybatisflex.core.service.IService;
 public interface FeedbackMessageService extends IService<FeedbackMessage> {
 
     void create(FeedbackMessageVO vo);
+
+    QueryWrapper getQueryWrapper(FeedbackQueryRequest feedbackMessage);
 }
