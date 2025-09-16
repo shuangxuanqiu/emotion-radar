@@ -2,13 +2,63 @@
     <div class="user-feedback-management">
         <div class="page-header">
             <h2>用户反馈管理</h2>
-            <a-button type="primary" @click="showCreateModal">
-                <template #icon>
-                    <PlusOutlined />
-                </template>
-                新增反馈
-            </a-button>
+            <a-space>
+                <a-button type="default" @click="showStatsModal">
+                    <template #icon>
+                        <BarChartOutlined />
+                    </template>
+                    统计分析
+                </a-button>
+                <a-button type="primary" @click="showCreateModal">
+                    <template #icon>
+                        <PlusOutlined />
+                    </template>
+                    新增反馈
+                </a-button>
+            </a-space>
         </div>
+
+        <!-- 统计概览卡片 -->
+        <a-row :gutter="16" class="stats-overview">
+            <a-col :span="6">
+                <a-card>
+                    <a-statistic
+                        title="总反馈数"
+                        :value="statsData.totalFeedbacks"
+                        :value-style="{ color: '#3f8600' }"
+                    />
+                </a-card>
+            </a-col>
+            <a-col :span="6">
+                <a-card>
+                    <a-statistic
+                        title="正常复制"
+                        :value="statsData.normalCopy"
+                        :value-style="{ color: '#1890ff' }"
+                    />
+                </a-card>
+            </a-col>
+            <a-col :span="6">
+                <a-card>
+                    <a-statistic
+                        title="不满意反馈"
+                        :value="statsData.dissatisfiedFeedback"
+                        :value-style="{ color: '#ff4d4f' }"
+                    />
+                </a-card>
+            </a-col>
+            <a-col :span="6">
+                <a-card>
+                    <a-statistic
+                        title="满意度"
+                        :value="statsData.satisfactionRate"
+                        suffix="%"
+                        :precision="1"
+                        :value-style="{ color: '#52c41a' }"
+                    />
+                </a-card>
+            </a-col>
+        </a-row>
 
         <!-- 搜索栏 -->
         <a-card class="search-card" :bordered="false">
@@ -37,6 +87,46 @@
                 </a-form-item>
             </a-form>
         </a-card>
+
+        <!-- 统计分析弹窗 -->
+        <a-modal v-model:open="statsModalVisible" title="反馈统计分析" :width="1200" :footer="null">
+            <div class="stats-modal-content">
+                <!-- 图表区域 -->
+                <a-row :gutter="16" class="chart-row">
+                    <a-col :span="12">
+                        <a-card title="消息类型分布" class="chart-card">
+                            <v-chart :option="pieChartOption" style="height: 300px;" />
+                        </a-card>
+                    </a-col>
+                    <a-col :span="12">
+                        <a-card title="按聊天ID分组统计" class="chart-card">
+                            <v-chart :option="barChartOption" style="height: 300px;" />
+                        </a-card>
+                    </a-col>
+                </a-row>
+                
+                <!-- 详细统计表格 -->
+                <a-card title="详细统计数据" class="mt-4">
+                    <a-table 
+                        :dataSource="chatIdStats" 
+                        :columns="statsColumns" 
+                        :pagination="false"
+                        size="small"
+                        row-key="chatId"
+                    >
+                        <template #bodyCell="{ column, record }">
+                            <template v-if="column.key === 'satisfactionRate'">
+                                <a-progress 
+                                    :percent="record.satisfactionRate" 
+                                    size="small" 
+                                    :status="record.satisfactionRate >= 80 ? 'success' : record.satisfactionRate >= 60 ? 'normal' : 'exception'"
+                                />
+                            </template>
+                        </template>
+                    </a-table>
+                </a-card>
+            </div>
+        </a-modal>
 
         <!-- 数据表格 -->
         <a-card :bordered="false">
@@ -154,12 +244,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { message } from 'ant-design-vue'
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, SearchOutlined, BarChartOutlined } from '@ant-design/icons-vue'
 import api from '@/api'
 import type { TableColumnsType } from 'ant-design-vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { PieChart, BarChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent
+} from 'echarts/components'
+import VChart from 'vue-echarts'
+
+// 注册必要的组件
+use([
+  CanvasRenderer,
+  PieChart,
+  BarChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent
+])
 
 // 响应式数据
 const loading = ref(false)
@@ -167,8 +278,10 @@ const submitLoading = ref(false)
 const dataSource = ref<API.FeedbackMessage[]>([])
 const modalVisible = ref(false)
 const viewModalVisible = ref(false)
+const statsModalVisible = ref(false)
 const modalTitle = ref('新增用户反馈')
 const editingId = ref<number | null>(null)
+const allFeedbackData = ref<API.FeedbackMessage[]>([])
 
 // 搜索表单
 const searchForm = reactive({
@@ -199,6 +312,210 @@ const formData = reactive<API.FeedbackMessage>({
 
 // 查看详情数据
 const viewData = reactive<API.FeedbackMessage>({})
+
+// 统计数据
+const statsData = computed(() => {
+    const total = allFeedbackData.value.length
+    const normalCopy = allFeedbackData.value.filter(item => item.messageType === 0).length
+    const dissatisfiedFeedback = allFeedbackData.value.filter(item => item.messageType === 1).length
+    const satisfactionRate = total > 0 ? ((normalCopy / total) * 100) : 0
+    
+    return {
+        totalFeedbacks: total,
+        normalCopy,
+        dissatisfiedFeedback,
+        satisfactionRate
+    }
+})
+
+// 按聊天ID分组的统计数据
+const chatIdStats = computed(() => {
+    const chatGroups = new Map<string, {
+        chatId: string,
+        totalCount: number,
+        normalCount: number,
+        dissatisfiedCount: number,
+        satisfactionRate: number
+    }>()
+    
+    allFeedbackData.value.forEach(item => {
+        if (!item.chatId) return
+        
+        if (!chatGroups.has(item.chatId)) {
+            chatGroups.set(item.chatId, {
+                chatId: item.chatId,
+                totalCount: 0,
+                normalCount: 0,
+                dissatisfiedCount: 0,
+                satisfactionRate: 0
+            })
+        }
+        
+        const group = chatGroups.get(item.chatId)!
+        group.totalCount++
+        
+        if (item.messageType === 0) {
+            group.normalCount++
+        } else if (item.messageType === 1) {
+            group.dissatisfiedCount++
+        }
+        
+        group.satisfactionRate = group.totalCount > 0 ? 
+            Math.round((group.normalCount / group.totalCount) * 100) : 0
+    })
+    
+    return Array.from(chatGroups.values()).sort((a, b) => b.totalCount - a.totalCount)
+})
+
+// 饼图配置
+const pieChartOption = computed(() => ({
+    title: {
+        text: '消息类型分布',
+        left: 'center',
+        textStyle: {
+            fontSize: 16
+        }
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+    },
+    legend: {
+        bottom: '10%',
+        left: 'center'
+    },
+    series: [
+        {
+            name: '消息类型',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['50%', '45%'],
+            avoidLabelOverlap: false,
+            label: {
+                show: false,
+                position: 'center'
+            },
+            emphasis: {
+                label: {
+                    show: true,
+                    fontSize: '18',
+                    fontWeight: 'bold'
+                }
+            },
+            labelLine: {
+                show: false
+            },
+            data: [
+                {
+                    value: statsData.value.normalCopy,
+                    name: '正常复制',
+                    itemStyle: { color: '#1890ff' }
+                },
+                {
+                    value: statsData.value.dissatisfiedFeedback,
+                    name: '不满意反馈',
+                    itemStyle: { color: '#ff4d4f' }
+                }
+            ]
+        }
+    ]
+}))
+
+// 柱状图配置
+const barChartOption = computed(() => {
+    const top10Data = chatIdStats.value.slice(0, 10)
+    
+    return {
+        title: {
+            text: 'Top 10 聊天ID统计',
+            left: 'center',
+            textStyle: {
+                fontSize: 16
+            }
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        legend: {
+            bottom: '5%',
+            data: ['正常复制', '不满意反馈']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '15%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: top10Data.map(item => item.chatId.substring(0, 8) + '...'),
+            axisLabel: {
+                rotate: 45
+            }
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: '正常复制',
+                type: 'bar',
+                stack: 'total',
+                data: top10Data.map(item => item.normalCount),
+                itemStyle: { color: '#1890ff' }
+            },
+            {
+                name: '不满意反馈',
+                type: 'bar',
+                stack: 'total',
+                data: top10Data.map(item => item.dissatisfiedCount),
+                itemStyle: { color: '#ff4d4f' }
+            }
+        ]
+    }
+})
+
+// 统计表格列配置
+const statsColumns: TableColumnsType = [
+    {
+        title: '聊天ID',
+        dataIndex: 'chatId',
+        key: 'chatId',
+        width: 200,
+        ellipsis: true
+    },
+    {
+        title: '总反馈数',
+        dataIndex: 'totalCount',
+        key: 'totalCount',
+        width: 100,
+        sorter: (a: any, b: any) => a.totalCount - b.totalCount
+    },
+    {
+        title: '正常复制',
+        dataIndex: 'normalCount',
+        key: 'normalCount',
+        width: 100,
+        sorter: (a: any, b: any) => a.normalCount - b.normalCount
+    },
+    {
+        title: '不满意反馈',
+        dataIndex: 'dissatisfiedCount',
+        key: 'dissatisfiedCount',
+        width: 120,
+        sorter: (a: any, b: any) => a.dissatisfiedCount - b.dissatisfiedCount
+    },
+    {
+        title: '满意度',
+        dataIndex: 'satisfactionRate',
+        key: 'satisfactionRate',
+        width: 150,
+        sorter: (a: any, b: any) => a.satisfactionRate - b.satisfactionRate
+    }
+]
 
 // 表单引用
 const formRef = ref()
@@ -261,6 +578,24 @@ const columns: TableColumnsType = [
         fixed: 'right'
     }
 ]
+
+// 加载所有数据用于统计
+const loadAllData = async () => {
+    try {
+        const response = await api.yonghufankuiguanli.list1()
+        if (response && response.data) {
+            allFeedbackData.value = response.data
+        }
+    } catch (error) {
+        console.error('加载统计数据失败:', error)
+    }
+}
+
+// 显示统计分析弹窗
+const showStatsModal = async () => {
+    await loadAllData()
+    statsModalVisible.value = true
+}
 
 // 加载数据
 const loadData = async () => {
@@ -453,6 +788,7 @@ const resetFormData = () => {
 // 组件挂载时加载数据
 onMounted(() => {
     loadData()
+    loadAllData()
 })
 </script>
 
@@ -475,10 +811,45 @@ onMounted(() => {
     margin: 0;
     font-size: 24px;
     font-weight: 600;
+    color: #1a1a1a;
 }
 
 .search-card {
     margin-bottom: 16px;
+}
+
+/* 统计概览样式 */
+.stats-overview {
+    margin-bottom: 24px;
+}
+
+.stats-overview .ant-card {
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 统计分析弹窗样式 */
+.stats-modal-content {
+    padding: 16px 0;
+}
+
+.chart-row {
+    margin-bottom: 24px;
+}
+
+.chart-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-card :deep(.ant-card-head-title) {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.mt-4 {
+    margin-top: 24px;
 }
 
 /* 表格样式优化 */
@@ -513,6 +884,18 @@ onMounted(() => {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
+    }
+    
+    .stats-overview {
+        margin-bottom: 16px;
+    }
+    
+    .stats-overview .ant-col {
+        margin-bottom: 8px;
+    }
+    
+    .chart-card {
+        margin-bottom: 16px;
     }
     
     :deep(.ant-table-wrapper) {
