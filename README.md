@@ -86,11 +86,7 @@
 
 <img src="https://media.giphy.com/media/8Iv5lqKwKsZ2g/giphy.gif" width="200"/>
 
-*抖音同款黄脸干杯* 🍷✨
 
-<br>
-
-<img src="https://github.com/user-attachments/assets/cheers-emoji.png" width="150" alt="黄脸干杯表情包"/>
 
 *超可爱的黄脸干杯* 🥂✨
 
@@ -126,18 +122,31 @@
 
 <div align="center">
 
-#### 🎯 实际使用场景演示
+#### 🎯 完整操作流程演示
 
-**步骤1：聊天界面截图**
+**步骤1：聊天界面截图分析**
 <img src="https://imgsea.com/images/2025/09/17/7bf9884d488f449aa65f036125a72506.md.jpg" width="300" alt="聊天界面截图"/>
+*📱 上传聊天截图，AI开始智能识别*
 
-**步骤2：轻敲背部触发分析**
-<img src="https://imgsea.com/images/2025/09/17/ba1c9d3abffbfc35342d8937e81a7dec.md.jpg" width="300" alt="快捷指令触发"/>
+---
 
-**步骤3：AI分析结果展示**
-<img src="https://imgsea.com/images/2025/09/17/4fe16d260d045a4a346c08dd2936adde.md.jpg" width="300" alt="AI分析结果"/>
+**步骤2：选择聊天背景场景**
+<img src="https://imgsea.com/images/2025/09/17/019b337ebcb000f4734649f1cd5d6812.md.jpg" width="300" alt="选择聊天背景"/>
+*🎭 选择对话场景：朋友聊天、职场沟通、恋爱对话等*
 
-*📱 真实用户使用截图 - 从尬聊到神回复只需28秒！*
+---
+
+**步骤3：设置情感指数**
+<img src="https://imgsea.com/images/2025/09/17/4fe16d260d045a4a346c08dd2936adde.md.jpg" width="300" alt="选择情感分数"/>
+*📊 调节情感强度：1-10分，匹配你想要的回复风格*
+
+---
+
+**步骤4：获取AI回复建议**
+<img src="https://imgsea.com/images/2025/09/17/ba1c9d3abffbfc35342d8937e81a7dec.md.jpg" width="300" alt="AI分析结果"/>
+*🤖 AI生成多个回复选项，告别尬聊困扰！*
+
+**🎉 从尬聊到神回复，只需28秒四步走！**
 
 </div>
 
