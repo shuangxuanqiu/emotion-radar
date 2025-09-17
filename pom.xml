@@ -58,12 +58,6 @@
             <artifactId>dashscope-sdk-java</artifactId>
             <version>2.21.8</version>
         </dependency>
-        <!-- TransmittableThreadLocal (TTL) - 解决异步执行时线程局部变量传递问题 -->
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>transmittable-thread-local</artifactId>
-            <version>2.14.5</version>
-        </dependency>
         <!-- Spring AI Alibaba -->
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>

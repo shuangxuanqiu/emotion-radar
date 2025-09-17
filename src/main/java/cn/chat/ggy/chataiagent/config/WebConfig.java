@@ -1,6 +1,6 @@
 package cn.chat.ggy.chataiagent.config;
 
-import cn.chat.ggy.chataiagent.interceptor.TTLContextInterceptor;
+import cn.chat.ggy.chataiagent.interceptor.ContextInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Web配置类
- * 注册TTL上下文拦截器
+ * 注册上下文拦截器，在JDK21虚拟线程环境下自动管理ThreadLocal上下文
  * 
  * @author 来自小扬 (＾▽＾)／
  */
@@ -16,11 +16,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final TTLContextInterceptor ttlContextInterceptor;
+    private final ContextInterceptor contextInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(ttlContextInterceptor)
+        registry.addInterceptor(contextInterceptor)
                 .addPathPatterns("/**")  // 拦截所有请求
                 .excludePathPatterns(
                     "/favicon.ico",

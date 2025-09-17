@@ -9,14 +9,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
- * TTL上下文拦截器
+ * 上下文拦截器
  * 自动为每个请求设置traceId和其他上下文信息
+ * 在JDK21虚拟线程环境下，ThreadLocal能够正确传递到异步线程
  * 
  * @author 来自小扬 (＾▽＾)／
  */
 @Slf4j
 @Component
-public class TTLContextInterceptor implements HandlerInterceptor {
+public class ContextInterceptor implements HandlerInterceptor {
 
     private static final String TRACE_ID_HEADER = "X-Trace-Id";
     private static final String TRACE_ID_KEY = "traceId";
@@ -42,12 +43,12 @@ public class TTLContextInterceptor implements HandlerInterceptor {
             // 在响应头中返回traceId
             response.setHeader(TRACE_ID_HEADER, traceId);
 
-            log.debug("TTL上下文设置完成 - traceId: {}, uri: {}, method: {}, ip: {}", 
+            log.debug("上下文设置完成 - traceId: {}, uri: {}, method: {}, ip: {}", 
                      traceId, request.getRequestURI(), request.getMethod(), getClientIpAddress(request));
 
             return true;
         } catch (Exception e) {
-            log.error("设置TTL上下文失败", e);
+            log.error("设置上下文失败", e);
             // 即使失败也继续处理请求
             return true;
         }
@@ -59,9 +60,9 @@ public class TTLContextInterceptor implements HandlerInterceptor {
         try {
             // 请求完成后清理上下文
             MonitorContextHolder.clearContext();
-            log.debug("TTL上下文已清理");
+            log.debug("上下文已清理");
         } catch (Exception e) {
-            log.error("清理TTL上下文失败", e);
+            log.error("清理上下文失败", e);
         }
     }
 

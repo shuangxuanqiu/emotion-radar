@@ -2,7 +2,9 @@ package cn.chat.ggy.chataiagent.app;
 
 import cn.chat.ggy.chataiagent.model.ImageOcr.UserInfoList;
 import cn.chat.ggy.chataiagent.advisor.MyLoggerAdvisor;
+import cn.chat.ggy.chataiagent.advisor.ImageAnalysisObservabilityAdvisor;
 import cn.chat.ggy.chataiagent.chatmemory.RedisChatMemory;
+import cn.chat.ggy.chataiagent.monitor.MonitorContextHolder;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.dashscope.chat.MessageFormat;
 import com.alibaba.cloud.ai.dashscope.common.DashScopeApiConstants;
@@ -48,11 +50,12 @@ public class ImageAnalysisAPP {
      */
     public ImageAnalysisAPP(ChatModel dashscopeChatModel, 
                            RedisTemplate<String,Object> redisTemplate,
-                           @Qualifier("promptImageAnalysis") String promptImageAnalysis) {
+                           @Qualifier("promptImageAnalysis") String promptImageAnalysis,
+                           ImageAnalysisObservabilityAdvisor imageAnalysisObservabilityAdvisor) {
         this.systemPrompt = promptImageAnalysis;
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(new RedisChatMemory(redisTemplate))
-                .maxMessages(2)
+                .maxMessages(1)
                 .build();
         //初始化构建
         chatClient =  ChatClient.builder(dashscopeChatModel)
@@ -64,6 +67,8 @@ public class ImageAnalysisAPP {
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
                         //自定义 advisor
                         new MyLoggerAdvisor()
+                        //图像分析AI可观测性 advisor
+                        ,imageAnalysisObservabilityAdvisor
                 )
                 .build();
     }
@@ -123,6 +128,11 @@ public class ImageAnalysisAPP {
            
            // 步骤5：执行AI分析
            long analysisStart = System.currentTimeMillis();
+           
+           // 设置监控上下文
+           MonitorContextHolder.setContext("chatId", chatId);
+           MonitorContextHolder.setContext("requestUri", "/api/image/analysis");
+           
            UserInfoList entity = chatClient.prompt(chatPrompt)
                    .toolContext(Map.of("chatId", chatId))
                    .call()

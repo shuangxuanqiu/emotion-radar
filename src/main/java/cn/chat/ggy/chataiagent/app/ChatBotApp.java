@@ -3,7 +3,9 @@ package cn.chat.ggy.chataiagent.app;
 
 import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 import cn.chat.ggy.chataiagent.advisor.MyLoggerAdvisor;
+import cn.chat.ggy.chataiagent.advisor.TextChatObservabilityAdvisor;
 import cn.chat.ggy.chataiagent.chatmemory.RedisChatMemory;
+import cn.chat.ggy.chataiagent.monitor.MonitorContextHolder;
 import cn.chat.ggy.chataiagent.config.PromptConfig;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +50,8 @@ public class ChatBotApp {
     public ChatBotApp(ChatModel dashscopeChatModel,
                       RedisTemplate<String,Object> redisTemplate,
                       PromptConfig promptConfig,
-                      MyLoggerAdvisor myLoggerAdvisor) throws IOException {
+                      MyLoggerAdvisor myLoggerAdvisor,
+                      TextChatObservabilityAdvisor textChatObservabilityAdvisor) throws IOException {
         //基于redis的对话记忆
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(new RedisChatMemory(redisTemplate))
@@ -65,6 +68,8 @@ public class ChatBotApp {
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
                         //自定义 advisor (通过构造函数注入)
                         myLoggerAdvisor
+//                        //文字聊天AI可观测性 advisor
+//                        textChatObservabilityAdvisor
                 )
                 .build();
     }
@@ -78,6 +83,10 @@ public class ChatBotApp {
      * @return
      */
     public ResultInfo doChat(String message, String chatId) {
+        // 设置监控上下文
+        MonitorContextHolder.setContext("chatId", chatId);
+        MonitorContextHolder.setContext("requestUri", "/api/chat");
+        
         ResultInfo entity = chatClient.prompt()
                 .user(message)
                 .toolContext(Map.of("chatId", chatId))//将房间号，存储到工具上下文中

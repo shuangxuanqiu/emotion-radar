@@ -1,6 +1,5 @@
 package cn.chat.ggy.chataiagent.monitor;
 
-import com.alibaba.ttl.TransmittableThreadLocal;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -10,10 +9,10 @@ import java.util.Map;
 public class MonitorContextHolder {
 
     /**
-     * 使用TransmittableThreadLocal替代ThreadLocal
-     * 解决异步执行时上下文传递问题
+     * 使用ThreadLocal存储监控上下文
+     * 在JDK21虚拟线程环境下，ThreadLocal能够正确传递到异步线程
      */
-    private static final TransmittableThreadLocal<Map<String, String>> CONTEXT_HOLDER = new TransmittableThreadLocal<>();
+    private static final ThreadLocal<Map<String, String>> CONTEXT_HOLDER = new ThreadLocal<>();
 
     /**
      * 设置监控上下文（支持多个键值对）
