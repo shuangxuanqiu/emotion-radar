@@ -6,8 +6,8 @@
 
 ### 🍻 是时候举杯告别社恐时代了！🍻
 
-<img src="https://media.giphy.com/media/g9582DNuQppxC/giphy.gif" width="250"/>
-<img src="https://media.giphy.com/media/g9582DNuQppxC/giphy.gif" width="250"/>
+<img src="https://media.giphy.com/media/8Iv5lqKwKsZ2g/giphy.gif" width="200"/>
+
 
 *了不起的盖茨比式举杯庆祝* 🥂
 
@@ -121,6 +121,25 @@
    - 轻敲手机背部三次
    - 等待 AI 分析并获得回复建议（约28秒）
    - 分析结果将以HTML页面形式展示（通过12845端口的Nginx服务）
+
+### 📸 快捷指令使用示例
+
+<div align="center">
+
+#### 🎯 实际使用场景演示
+
+**步骤1：聊天界面截图**
+<img src="https://imgsea.com/images/2025/09/17/7bf9884d488f449aa65f036125a72506.md.jpg" width="300" alt="聊天界面截图"/>
+
+**步骤2：轻敲背部触发分析**
+<img src="https://imgsea.com/images/2025/09/17/ba1c9d3abffbfc35342d8937e81a7dec.md.jpg" width="300" alt="快捷指令触发"/>
+
+**步骤3：AI分析结果展示**
+<img src="https://imgsea.com/images/2025/09/17/4fe16d260d045a4a346c08dd2936adde.md.jpg" width="300" alt="AI分析结果"/>
+
+*📱 真实用户使用截图 - 从尬聊到神回复只需28秒！*
+
+</div>
 
 ### 🛠 本地部署
 
