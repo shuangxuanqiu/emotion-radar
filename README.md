@@ -7,6 +7,7 @@
 ### 🍻 是时候举杯告别社恐时代了！🍻
 
 <img src="https://media.giphy.com/media/g9582DNuQppxC/giphy.gif" width="250"/>
+<img src="https://media.giphy.com/media/g9582DNuQppxC/giphy.gif" width="250"/>
 
 *了不起的盖茨比式举杯庆祝* 🥂
 
