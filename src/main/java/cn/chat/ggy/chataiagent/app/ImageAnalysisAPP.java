@@ -3,22 +3,18 @@ package cn.chat.ggy.chataiagent.app;
 import cn.chat.ggy.chataiagent.model.ImageOcr.UserInfoList;
 import cn.chat.ggy.chataiagent.advisor.MyLoggerAdvisor;
 import cn.chat.ggy.chataiagent.advisor.ImageAnalysisObservabilityAdvisor;
-import cn.chat.ggy.chataiagent.chatmemory.RedisChatMemory;
 import cn.chat.ggy.chataiagent.monitor.MonitorContextHolder;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import com.alibaba.cloud.ai.dashscope.chat.MessageFormat;
 import com.alibaba.cloud.ai.dashscope.common.DashScopeApiConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.content.Media;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,27 +40,20 @@ public class ImageAnalysisAPP {
 
     /**
      * 图片解析的 chatclient
-     * @param dashscopeChatModel
-     * @param redisTemplate
+     * @param dashscopeChatModel AI聊天模型
      * @param promptImageAnalysis 图片分析提示词
+     * @param imageAnalysisObservabilityAdvisor 图像分析可观测性顾问
      */
     public ImageAnalysisAPP(ChatModel dashscopeChatModel, 
-                           RedisTemplate<String,Object> redisTemplate,
                            @Qualifier("promptImageAnalysis") String promptImageAnalysis,
                            ImageAnalysisObservabilityAdvisor imageAnalysisObservabilityAdvisor) {
         this.systemPrompt = promptImageAnalysis;
-        MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
-                .chatMemoryRepository(new RedisChatMemory(redisTemplate))
-                .maxMessages(1)
-                .build();
         //初始化构建
         chatClient =  ChatClient.builder(dashscopeChatModel)
                 //引入系统提示词
                 .defaultSystem(systemPrompt)
                 //顾问，拦截器
                 .defaultAdvisors(
-                        //上下文回答的保存机制
-                        MessageChatMemoryAdvisor.builder(chatMemory).build(),
                         //自定义 advisor
                         new MyLoggerAdvisor()
                         //图像分析AI可观测性 advisor

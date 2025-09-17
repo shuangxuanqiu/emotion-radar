@@ -1,6 +1,6 @@
 # ===============================================
-# 本地开发环境配置文件示例
-# 请复制此文件为 application-local.yml 并配置你的实际信息
+# 本地开发环境配置文件 (不会上传到远程仓库)
+# 请根据你的实际环境配置以下敏感信息
 # ===============================================
 
 spring:
@@ -8,48 +8,54 @@ spring:
     name: ggy-ai-agent
   ai:
     dashscope:
-      # 请替换为你的阿里云通义千问 API Key
-      # 获取地址: https://dashscope.console.aliyun.com/
-      api-key: your-dashscope-api-key-here
+      # 你的阿里云通义千问 API Key
+      api-key: sk-key
   data:
     redis:
-      # 如果你的 Redis 需要密码，请取消注释并配置
-      # password: your-redis-password
+      port: 6379
+    # 如果 Redis 需要密码，请在这里配置
+    # password: your-redis-password
+
   datasource:
-    # 请配置你的 MySQL 数据库密码
-    password: your-database-password
+    # 数据库密码
+    password: 123456
 
 # 本地开发环境特定配置
 server:
   # 如果需要使用不同的端口，可以在这里修改
-  # port: 12844
+   port: 12844
+#   port: 8123
 
 # 应用配置
 app:
   # 本地开发环境的基础 URL
-  base-url: http://localhost:8123
-  # 如果部署到服务器，请修改为你的服务器地址
-  # base-url: http://your-server-domain:port
+  # base-url: http://localhost:8123
+  # 生产环境的基础 URL
+  base-url: http://ddns.6010.top:12844
 
 # Search API 配置
 search-api:
-  # 请替换为你的 Search API Key
-  # 如果不使用搜索功能，可以保持默认值
-  api-key: your-search-api-key-here
+  # 你的 Search API Key
+  api-key: key
 
 # 本地开发环境日志配置
 logging:
   level:
-    # 开发环境建议设置为 DEBUG 查看更多调用细节
-    # 生产环境建议设置为 INFO
+    # 开发环境可以设置为 DEBUG 查看更多调用细节
     org.springframework.ai: DEBUG
     root: INFO
+    # MyBatis-Flex SQL 日志输出（本地开发环境）
+    com.mybatisflex.core.audit.ConsoleMessageCollector: DEBUG
+    com.mybatisflex.core.audit.MessageCollector: DEBUG
+    org.apache.ibatis: DEBUG
+    cn.chat.ggy.chataiagent.mapper: DEBUG
   file:
     name: logs/ggy-ai-agent.log
   pattern:
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
-# 可选配置
+# 本地环境可选配置
 # 如果需要启用 MCP SSE 连接，请取消注释并配置
 # spring:
 #   ai:
@@ -59,4 +65,3 @@ logging:
 #           connections:
 #             server1:
 #               url: http://127.0.0.1:8127
-

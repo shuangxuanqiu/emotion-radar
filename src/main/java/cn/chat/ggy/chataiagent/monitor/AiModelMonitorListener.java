@@ -43,8 +43,7 @@ public class AiModelMonitorListener {
                             traceId, chatId, usage.getTotalTokens(), usage.getPromptTokens(), usage.getCompletionTokens());
                 }
             } else {
-                log.warn("Token消耗记录跳过 - usage或chatId为空: usage={}, chatId={}, traceId={}", 
-                        usage, chatId, traceId);
+                log.warn("Token消耗记录跳过 - usage或chatId为空: usage={}, chatId={}, traceId={}",usage, chatId, traceId);
             }
         } catch (Exception e) {
             String traceId = MonitorContextHolder.getContext("traceId");
