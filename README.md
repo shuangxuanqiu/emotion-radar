@@ -1,11 +1,15 @@
-# 小扬情感雷达 - AI聊天助手
+# 🎯 小扬情感雷达 - AI聊天助手
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.4-green.svg)](https://spring.io/projects/spring-boot)
 [![Spring AI](https://img.shields.io/badge/Spring%20AI-1.0.0-blue.svg)](https://spring.io/projects/spring-ai)
+[![Vue 3](https://img.shields.io/badge/Vue-3.5.18-green.svg)](https://vuejs.org/)
+[![Ant Design Vue](https://img.shields.io/badge/Ant%20Design%20Vue-4.2.6-blue.svg)](https://antdv.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > 🚀 一个基于 AI 的智能聊天回复助手，通过苹果快捷指令与聊天界面截图分析，为你提供个性化的回复建议，告别尬聊困扰！
+> 
+> 📱 **核心特色**：三次轻敲手机背部 → 截图上传 → AI智能分析 → 生成个性化回复建议（约28秒完成）
 
 ## ✨ 项目特色
 
@@ -41,73 +45,111 @@
 
 ### 🛠 本地部署
 
-#### 环境要求
-- Java 21+
-- MySQL 8.0+
-- Redis 6.0+
-- Maven 3.8+
+#### 📋 环境要求
 
-#### 安装步骤
+**必需环境**
+- ☕ **Java 21+** - 核心运行环境
+- 🗄️ **MySQL 8.0+** - 主数据库
+- 🔴 **Redis 6.0+** - 缓存和会话管理
+- 📦 **Maven 3.8+** - 构建工具
+- 🌐 **Node.js 20.19+** - 前端构建环境
 
-1. **克隆项目**
+**可选环境**
+- 📊 **PgVector** - 向量数据库（如需RAG功能）
+- 🔧 **MCP 服务器** - 扩展工具调用（如高德地图API）
+
+#### 🚀 快速启动
+
+**1. 克隆项目**
 ```bash
 git clone https://github.com/your-username/my-ai-agent.git
 cd my-ai-agent
 ```
 
-2. **配置数据库**
+**2. 数据库初始化**
 ```sql
+# 创建数据库
 CREATE DATABASE ggy_picture CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# 创建用户（可选）
+CREATE USER 'ggy_user'@'localhost' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON ggy_picture.* TO 'ggy_user'@'localhost';
+FLUSH PRIVILEGES;
 ```
 
-3. **配置环境变量**
+**3. 核心配置**
 ```bash
-# 复制配置文件
+# 复制配置模板
 cp src/main/resources/application-local.yml.example src/main/resources/application-local.yml
 
-# 编辑配置文件，填入你的配置信息
+# 编辑配置文件
 vim src/main/resources/application-local.yml
 ```
 
-4. **启动服务**
-```bash
-# 启动 Redis
-redis-server
-
-# 启动 MySQL
-mysql.server start
-
-# 编译并运行项目
-mvn clean package -DskipTests
-java -jar target/chat-ai-agent-0.0.1-SNAPSHOT.jar
+**必需配置项**：
+```yaml
+spring:
+  ai:
+    dashscope:
+      api-key: sk-your-dashscope-api-key  # 阿里云通义千问API密钥
+  datasource:
+    password: your-database-password      # MySQL数据库密码
+    
+search-api:
+  api-key: your-search-api-key           # SearchAPI密钥（可选）
 ```
 
-5. **访问服务**
-   - API 文档：http://localhost:8123/api/swagger-ui.html
-   - 前端界面：http://localhost:8123
+**4. 服务启动**
+```bash
+# 启动基础服务
+redis-server                           # 启动Redis
+mysql.server start                     # 启动MySQL
+
+# 后端服务
+mvn clean package -DskipTests
+java -jar target/chat-ai-agent-0.0.1-SNAPSHOT.jar
+
+# 前端服务（新终端）
+cd ggy-chat-ai-agent/ggy-chat-ai-agent
+npm install
+npm run dev
+```
+
+**5. 访问验证**
+- 🔍 **API文档**: http://localhost:8123/api/swagger-ui.html
+- 🎨 **前端界面**: http://localhost:5173
+- ❤️ **健康检查**: http://localhost:8123/api/chat-ai/health
 
 ## 🏗 技术架构
 
-### 后端技术栈
-- **框架**：Spring Boot 3.4.4
-- **AI 引擎**：Spring AI + 阿里云百练 (DashScope)
-- **数据库**：MySQL 8.0 + MyBatis-Flex
-- **缓存**：Redis + Redisson
-- **图像处理**：Java AWT + ImageIO
-- **文档**：Knife4j (Swagger)
+### 🔧 后端技术栈
+- **核心框架**：Spring Boot 3.4.4 + Java 21
+- **AI 引擎**：Spring AI 1.0.0 + 阿里云百练 DashScope
+- **视觉模型**：通义千问 VL (qwen-vl-max) - 多模态图像理解
+- **数据存储**：MySQL 8.0 + MyBatis-Flex 1.11.1
+- **缓存系统**：Redis 6.0+ + Redisson 3.50.0
+- **图像处理**：智能压缩算法 + JPEG 质量优化
+- **API 文档**：Knife4j 4.5.0 (基于 OpenAPI 3)
+- **工具集成**：Web搜索、PDF生成、终端操作、文件处理等
 
-### 前端技术栈
-- **框架**：Vue 3 + TypeScript
-- **构建工具**：Vite
-- **UI 组件**：Element Plus
-- **路由**：Vue Router 4
-- **状态管理**：Pinia
+### 🎨 前端技术栈
+- **核心框架**：Vue 3.5.18 + TypeScript 5.8+
+- **构建工具**：Vite 7.0.6 + Node.js 20.19+
+- **UI 组件库**：Ant Design Vue 4.2.6
+- **数据可视化**：ECharts 5.6.0 + Vue-ECharts 7.0.3
+- **路由管理**：Vue Router 4.5.1
+- **状态管理**：Pinia 3.0.3
+- **HTTP 客户端**：Axios 1.12.1
+- **代码质量**：ESLint + Prettier
 
-### AI 能力
-- **多模态理解**：文本 + 图像联合分析
-- **对话记忆**：基于 Redis 的会话状态管理
-- **智能工具调用**：支持多种 AI 工具集成
-- **结构化输出**：JSON Schema 约束的响应格式
+### 🧠 AI 核心能力
+- **多模态分析**：文本 + 图像联合理解，支持微信/QQ/钉钉等主流聊天软件
+- **情感雷达系统**：深度分析对话情境、关系类型、情感背景
+- **智能提示词工程**：409行专业提示词，确保回复的原创性和真人化
+- **对话记忆管理**：基于 Redis 的会话状态持久化
+- **工具调用链**：Web搜索、PDF处理、终端操作等多种工具集成
+- **结构化输出**：JSON Schema 约束，确保响应格式一致性
+- **性能优化**：图像智能压缩、并行处理、缓存策略
 
 ## 📊 性能优化
 
@@ -122,38 +164,95 @@ java -jar target/chat-ai-agent-0.0.1-SNAPSHOT.jar
 - **连接池**：数据库连接池优化
 - **当前平均响应时间**：~28秒
 
-## 🔧 API 接口
+## 🔧 API 接口文档
 
-### 核心接口
+### 🎯 核心业务接口
 
-#### 图像分析
+#### 1. 情感雷达核心服务（推荐）
 ```http
-POST /api/image/analysis
+POST /api/chat-ai/emotion-radar
+Content-Type: multipart/form-data
+
+参数:
+- file: 聊天界面截图 (必需)
+- emotionalIndex: 情感指数 1-10 (必需)
+- conversationScene: 聊天背景描述 (必需)
+
+返回: HTML格式的可视化分析报告
+```
+
+#### 2. JSON格式图片分析
+```http
+POST /api/chat-ai/is-json
 Content-Type: multipart/form-data
 
 参数:
 - file: 聊天界面截图
-- prompt: 分析提示词（可选）
-- chatId: 会话ID
+- emotionalIndex: 情感指数
+
+返回: JSON格式的分析结果
 ```
 
-#### 文本聊天
+#### 3. SSE流式对话
 ```http
-POST /api/chat
+GET /api/chat-ai/travel_guide/chat/sse/emitter
+参数:
+- message: 用户消息
+- chatId: 会话ID
+
+返回: Server-Sent Events 流
+```
+
+### 📊 管理接口
+
+#### 系统健康检查
+```http
+GET /api/chat-ai/health
+
+返回: 系统状态、缓存统计、活跃连接数等
+```
+
+#### 获取聊天记录
+```http
+GET /api/chat-ai/chat/memory/redis?chatId={chatId}
+
+返回: Redis中的聊天历史记录
+```
+
+#### 用户反馈提交
+```http
+POST /api/chat-ai/chat/user/feedback
 Content-Type: application/json
 
 {
-  "message": "用户消息",
-  "chatId": "会话ID"
+  "chatId": "会话ID",
+  "messageType": "反馈类型",
+  "feedBackMessage": "反馈内容",
+  "resultStructure": {
+    "selectedText": "选择的文本",
+    "timestamp": "时间戳",
+    "emotionalIndex": 5
+  }
 }
 ```
 
-#### 情感雷达分析
+### 🛠 数据管理接口
+
+#### 图片解析记录管理
 ```http
-GET /api/emotion-radar/{chatId}
+# 分页查询
+POST /api/imageAnalysis/list/page/vo
+Content-Type: application/json
+
+# 查看详情
+GET /api/imageAnalysis/getInfo/{id}
+
+# 图片展示
+GET /api/imageAnalysis/display/**
 ```
 
-更多 API 详情请查看：[API 文档](http://localhost:8123/api/swagger-ui.html)
+### 📈 完整API文档
+- **Swagger UI**: http://localhost:8123/api/doc.htm
 
 ## 🎨 功能特性
 
@@ -191,11 +290,13 @@ GET /api/emotion-radar/{chatId}
 
 ## 🔒 隐私安全
 
-- **本地部署**：支持完全本地化部署，数据不出本地
-- **图片加密**：上传图片采用加密传输
-- **会话隔离**：不同用户会话完全隔离
-- **数据清理**：定期清理临时文件和缓存数据
-- **访问控制**：支持 API 访问权限控制
+- **🏠 本地部署优先**：支持完全本地化部署，数据不出本地环境
+- **🔐 传输加密**：HTTPS + 图片上传加密传输，保护数据安全
+- **🚪 会话隔离**：基于 chatId 的完全隔离，不同用户数据互不干扰
+- **🗑️ 自动清理**：定期清理临时文件、缓存数据和过期会话
+- **🛡️ 访问控制**：API 接口权限控制，防止未授权访问
+- **📊 数据脱敏**：敏感信息自动脱敏处理，保护用户隐私
+- **⚡ 内存安全**：ThreadLocal 上下文自动清理，防止内存泄漏
 
 ## 🤝 贡献指南
 
@@ -224,13 +325,80 @@ GET /api/emotion-radar/{chatId}
 - [阿里云百练](https://www.aliyun.com/product/bailian) - 优秀的大语言模型服务
 - [苹果快捷指令](https://support.apple.com/zh-cn/guide/shortcuts/welcome/ios) - 便捷的自动化工具
 
+## 📊 项目配置详解
+
+### 🔑 API密钥获取
+
+#### 阿里云通义千问 (必需)
+1. 访问 [阿里云百练控制台](https://dashscope.console.aliyun.com/)
+2. 注册并实名认证阿里云账户
+3. 开通 DashScope 服务
+4. 创建 API Key，复制到配置文件中
+
+#### SearchAPI (可选)
+1. 访问 [SearchAPI官网](https://www.searchapi.io/)
+2. 注册账户并获取 API Key
+3. 配置到 `search-api.api-key`
+
+#### 高德地图 MCP (可选)
+1. 访问 [高德开放平台](https://lbs.amap.com/)
+2. 申请 Web 服务 API Key
+3. 配置到 `mcp-servers.json` 中
+
+### ⚙️ 高级配置
+
+#### 性能调优
+```yaml
+# 数据库连接池优化
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 20      # 最大连接数
+      minimum-idle: 5            # 最小空闲连接
+      idle-timeout: 300000       # 空闲超时时间
+      connection-timeout: 20000   # 连接超时时间
+
+# AI模型配置
+spring:
+  ai:
+    dashscope:
+      chat-vl:
+        options:
+          model: qwen-vl-max      # 视觉模型
+          temperature: 0.6        # 创造性参数
+```
+
+#### 日志配置
+```yaml
+logging:
+  level:
+    org.springframework.ai: DEBUG     # AI调用日志
+    cn.chat.ggy.chataiagent: INFO    # 应用日志
+  file:
+    name: logs/ggy-ai-agent.log      # 日志文件路径
+```
+
+### 🚀 生产环境部署
+
+#### Docker 部署 (推荐)
+```dockerfile
+# 后续版本将提供 Docker 支持
+# 敬请期待...
+```
+
+#### 环境变量配置
+```bash
+# 生产环境建议使用环境变量
+export DASHSCOPE_API_KEY=your-api-key
+export DATABASE_PASSWORD=your-password
+export REDIS_PASSWORD=your-redis-password
+```
+
 ## 📞 联系我们
 
-- **邮箱联系**：2694732783@qq.com
-- **项目主页**：https://github.com/your-username/my-ai-agent
-- **问题反馈**：https://github.com/your-username/my-ai-agent/issues
-- **讨论交流**：https://github.com/your-username/my-ai-agent/discussions
-
+- **📧 邮箱联系**：2694732783@qq.com
+- **💬 技术交流**：欢迎提交Issue讨论技术问题
+- **🔧 功能建议**：通过Issue提出新功能需求
 ---
 
 <div align="center">
