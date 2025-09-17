@@ -23,15 +23,14 @@ spring:
 # 本地开发环境特定配置
 server:
   # 如果需要使用不同的端口，可以在这里修改
-   port: 12844
-#   port: 8123
+   port: 8123
 
 # 应用配置
 app:
   # 本地开发环境的基础 URL
   # base-url: http://localhost:8123
   # 生产环境的基础 URL
-  base-url: http://ddns.6010.top:12844
+  base-url: http://localhost:8123
 
 # Search API 配置
 search-api:

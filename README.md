@@ -1,3 +1,17 @@
+<div align="center">
+
+# 🔥 你还在尬聊吗？🔥
+
+## 💔 你还在因为不会聊天而错过那个【她他它】吗？💔
+
+### 🍻 是时候举杯告别社恐时代了！🍻
+
+<img src="https://media.giphy.com/media/g9582DNuQppxC/giphy.gif" width="250"/>
+
+*了不起的盖茨比式举杯庆祝* 🥂
+
+---
+
 # 🎯 小扬情感雷达 - AI聊天助手
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.java.net/)
@@ -7,23 +21,81 @@
 [![Ant Design Vue](https://img.shields.io/badge/Ant%20Design%20Vue-4.2.6-blue.svg)](https://antdv.com/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> 🚀 一个基于 AI 的智能聊天回复助手，通过苹果快捷指令与聊天界面截图分析，为你提供个性化的回复建议，告别尬聊困扰！
-> 
-> 📱 **核心特色**：三次轻敲手机背部 → 截图上传 → AI智能分析 → 生成个性化回复建议（约28秒完成）
+</div>
+
+<div align="center">
+
+## 🚀 从此告别尬聊，让AI成为你的聊天军师！
+
+### 💬 不知道怎么回复？三次轻敲解决所有尴尬！
+
+---
+
+### 🎉 核心特色
+
+**📱 三步走战略**：轻敲背部 → AI分析 → 完美回复（28秒搞定）
+
+**🧠 情感雷达**：深度理解对话情境，生成最贴合的回复
+
+**💕 告别单身**：不再因为不会聊天而错过心仪的TA
+
+</div>
 
 ## ✨ 项目特色
 
+<div align="center">
+
+### 🎭 告别这些尴尬瞬间
+
+| 😰 聊天困境 | 🤖 AI救援 | 🎉 完美结果 |
+|------------|----------|-----------|
+| 💬 "在吗？" | 🔍 智能分析语境 | 😊 自然回复不尬聊 |
+| 🤔 不知道聊什么 | 🎯 话题建议生成 | 💕 聊天氛围升温 |
+| 😅 回复太生硬 | 🎨 个性化语言 | 🌟 展现真实魅力 |
+
+</div>
+
 ### 🎯 核心功能
-- **智能截图分析**：基于 AI 视觉模型分析各类聊天软件界面
-- **情感雷达系统**：深度理解对话情境和情感背景
-- **个性化回复建议**：生成符合语境的多样化回复选项
-- **苹果快捷指令集成**：三次轻敲背部即可启动分析
+- **🔍 智能截图分析**：基于 AI 视觉模型分析各类聊天软件界面
+- **💖 情感雷达系统**：深度理解对话情境和情感背景  
+- **🎨 个性化回复建议**：生成符合语境的多样化回复选项
+- **📱 苹果快捷指令集成**：三次轻敲背部即可启动分析
 
 ### 🔥 应用场景
-- **社交困难救星**：不知道怎么回复时的智能助手
-- **尬聊终结者**：提供自然流畅的对话建议
-- **情感理解**：分析对话背景和情绪状态
-- **多平台支持**：支持微信、QQ、钉钉、飞书等主流聊天软件
+- **🆘 社交困难救星**：不知道怎么回复时的智能助手
+- **💬 尬聊终结者**：提供自然流畅的对话建议
+- **🧠 情感理解**：分析对话背景和情绪状态
+- **📲 多平台支持**：支持微信、QQ、钉钉、飞书等主流聊天软件
+
+<div align="center">
+
+### 🎊 成功案例
+
+**从此你也可以：**
+
+🌹 **撩妹撩汉不再词穷** - AI帮你找到完美开场白
+
+💼 **职场沟通更专业** - 根据场景生成合适回复
+
+👨‍👩‍👧‍👦 **家庭群聊更和谐** - 智能识别长辈聊天风格
+
+<div align="center">
+
+### 🥂 举杯庆祝告别社恐！
+
+<img src="https://media.giphy.com/media/8Iv5lqKwKsZ2g/giphy.gif" width="200"/>
+
+*抖音同款黄脸干杯* 🍷✨
+
+<br>
+
+<img src="https://github.com/user-attachments/assets/cheers-emoji.png" width="150" alt="黄脸干杯表情包"/>
+
+*超可爱的黄脸干杯* 🥂✨
+
+</div>
+
+</div>
 
 ## 🚀 快速开始
 
@@ -38,10 +110,16 @@
    - 选择「轻点背面」→「轻点三下」
    - 选择刚刚添加的快捷指令
 
-3. **使用方法**
+3. **配置快捷指令服务地址**
+   - 在快捷指令中修改服务器地址为你的部署地址
+   - 本地开发：`http://localhost:8123`
+   - 生产环境：`http://your-domain.com:8123`
+
+4. **使用方法**
    - 在任意聊天界面截图或直接在聊天界面
    - 轻敲手机背部三次
    - 等待 AI 分析并获得回复建议（约28秒）
+   - 分析结果将以HTML页面形式展示（通过12845端口的Nginx服务）
 
 ### 🛠 本地部署
 
@@ -77,26 +155,68 @@ GRANT ALL PRIVILEGES ON ggy_picture.* TO 'ggy_user'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-**3. 核心配置**
+**3. 配置文件准备**
+
+⚠️ **重要提醒**：运行前必须完成以下配置文件重命名和编辑！
+
 ```bash
-# 复制配置模板
+# 第一步：复制并重命名配置文件模板
 cp src/main/resources/application-local.yml.example src/main/resources/application-local.yml
 
-# 编辑配置文件
+# 第二步：如需MCP功能，复制MCP配置文件
+cp src/main/resources/mcp-servers.json.example src/main/resources/mcp-servers.json
+
+# 第三步：编辑本地配置文件
 vim src/main/resources/application-local.yml
 ```
 
-**必需配置项**：
+**📝 必需配置项**：
 ```yaml
 spring:
   ai:
     dashscope:
-      api-key: sk-your-dashscope-api-key  # 阿里云通义千问API密钥
+      # ⚠️ 必须配置：阿里云通义千问API密钥
+      api-key: sk-your-dashscope-api-key-here
   datasource:
-    password: your-database-password      # MySQL数据库密码
-    
+    # ⚠️ 必须配置：MySQL数据库密码
+    password: your-database-password-here
+    # 可选：自定义数据库连接信息
+    url: jdbc:mysql://localhost:3306/ggy_picture
+    username: root
+  data:
+    redis:
+      # 可选：如果Redis设置了密码
+      # password: your-redis-password
+      host: 127.0.0.1
+      port: 6379
+
+# 可选配置：Web搜索功能
 search-api:
-  api-key: your-search-api-key           # SearchAPI密钥（可选）
+  api-key: your-search-api-key-here
+
+# 可选配置：自定义服务端口
+server:
+  port: 8123  # 默认端口，可根据需要修改
+
+# 可选配置：应用基础URL
+app:
+  base-url: http://localhost:8123
+```
+
+**🔧 MCP服务配置（可选）**：
+如果需要使用高德地图等扩展功能，编辑 `src/main/resources/mcp-servers.json`：
+```json
+{
+  "mcpServers": {
+    "amap-maps": {
+      "command": "npx",
+      "args": ["-y", "@amap/amap-maps-mcp-server"],
+      "env": {
+        "AMAP_MAPS_API_KEY": "your-amap-api-key-here"
+      }
+    }
+  }
+}
 ```
 
 **4. 服务启动**
@@ -115,10 +235,79 @@ npm install
 npm run dev
 ```
 
-**5. 访问验证**
-- 🔍 **API文档**: http://localhost:8123/api/swagger-ui.html
+**5. Nginx静态资源服务配置**
+
+为了正确展示生成的HTML分析报告，需要配置Nginx静态资源服务器：
+
+```bash
+# 创建静态资源目录
+sudo mkdir -p /www/tmp/code_output
+sudo chmod 755 /www/tmp/code_output
+```
+
+在 `/etc/nginx/conf.d/static-server.conf` 或 `/etc/nginx/sites-available/static-server` 中添加：
+```nginx
+# 静态资源服务器 - 12845 端口
+server {
+    listen       12845;
+    server_name  localhost;  # 生产环境改为你的域名
+
+    charset      utf-8;
+    charset_types text/css application/javascript text/plain text/xml application/json;
+    
+    # 项目部署根目录 - HTML分析报告存储路径
+    root         /www/tmp/code_output;
+    
+    # 处理所有请求，支持动态路径访问
+    location ~ ^/([^/]+)/(.*)$ {
+        try_files /$1/$2 /$1/index.html =404;
+    }
+    
+    # 添加安全头
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    
+    # 静态资源缓存设置
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 1d;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+重启Nginx服务：
+```bash
+# 测试配置
+sudo nginx -t
+
+# 重启Nginx
+sudo systemctl restart nginx
+# 或者
+sudo nginx -s reload
+```
+
+**6. 应用配置修改**
+
+⚠️ **重要**：需要修改项目中的静态资源访问域名配置
+
+找到项目中的 `CODE_DEPLOY_HOST` 常量（通常在常量类中），修改为你的实际域名：
+
+```java
+/**
+ * 应用部署域名 - 改成自己的域名和端口
+ */
+String CODE_DEPLOY_HOST = "http://your-domain.com:12845";
+// 本地开发环境示例：
+// String CODE_DEPLOY_HOST = "http://localhost:12845";
+// 生产环境示例：
+// String CODE_DEPLOY_HOST = "http://ddns.6010.top:12845";
+```
+
+**7. 访问验证**
+- 🔍 **API文档**: http://localhost:8123/api/doc.html
 - 🎨 **前端界面**: http://localhost:5173
 - ❤️ **健康检查**: http://localhost:8123/api/chat-ai/health
+- 📄 **静态资源服务**: http://localhost:12845
 
 ## 🏗 技术架构
 
@@ -252,7 +441,8 @@ GET /api/imageAnalysis/display/**
 ```
 
 ### 📈 完整API文档
-- **Swagger UI**: http://localhost:8123/api/doc.htm
+- **Knife4j文档**: http://localhost:8123/api/doc.html
+- **OpenAPI 3 规范**: http://localhost:8123/api/v3/api-docs
 
 ## 🎨 功能特性
 
@@ -380,18 +570,57 @@ logging:
 
 ### 🚀 生产环境部署
 
-#### Docker 部署 (推荐)
-```dockerfile
-# 后续版本将提供 Docker 支持
-# 敬请期待...
+#### 完整部署架构
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   前端 Vue3     │    │   后端 Spring    │    │  静态资源服务器  │
+│   Port: 5173    │────│   Port: 8123     │────│   Port: 12845   │
+│   (开发环境)    │    │                  │    │   (Nginx)       │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+                              │
+                    ┌─────────┼─────────┐
+                    │         │         │
+            ┌───────▼───┐ ┌───▼────┐ ┌──▼──────┐
+            │  MySQL    │ │ Redis  │ │ 阿里云AI │
+            │ Port:3306 │ │Port:6379│ │DashScope│
+            └───────────┘ └────────┘ └─────────┘
 ```
 
-#### 环境变量配置
+#### 生产环境配置检查清单
+
+**✅ 服务器配置**
+- [ ] Java 21+ 已安装
+- [ ] MySQL 8.0+ 已安装并运行
+- [ ] Redis 6.0+ 已安装并运行
+- [ ] Nginx 已安装并配置
+- [ ] 防火墙已开放必要端口 (8123, 12845)
+
+**✅ 配置文件**
+- [ ] `application-local.yml` 已配置正确的API密钥
+- [ ] `CODE_DEPLOY_HOST` 已修改为生产环境域名
+- [ ] Nginx静态服务器已配置并运行
+- [ ] 静态资源目录权限已设置 (`/www/tmp/code_output`)
+
+**✅ 安全配置**
+- [ ] 数据库密码已设置为强密码
+- [ ] Redis密码已配置（如需要）
+- [ ] API密钥已妥善保管
+- [ ] Nginx安全头已配置
+
+#### 环境变量配置（推荐）
 ```bash
 # 生产环境建议使用环境变量
 export DASHSCOPE_API_KEY=your-api-key
 export DATABASE_PASSWORD=your-password
 export REDIS_PASSWORD=your-redis-password
+export CODE_DEPLOY_HOST=http://your-domain.com:12845
+```
+
+#### Docker 部署 (规划中)
+```dockerfile
+# 后续版本将提供 Docker Compose 支持
+# 包含：Spring Boot + MySQL + Redis + Nginx
+# 敬请期待...
 ```
 
 ## 📞 联系我们
@@ -402,7 +631,33 @@ export REDIS_PASSWORD=your-redis-password
 ---
 
 <div align="center">
-  <strong>让 AI 成为你的聊天助手，告别尬聊时代！</strong>
-  <br>
-  <sub>如果这个项目对你有帮助，请给个 ⭐️ Star 支持一下！</sub>
+
+## 🎉 准备好告别尬聊了吗？
+
+### 🍻 举杯庆祝！从今天开始，你就是聊天达人！
+
+<img src="https://media.giphy.com/media/g9582DNuQppxC/giphy.gif" width="280"/>
+
+*盖茨比式优雅举杯* ✨
+
+**💝 让 AI 成为你的聊天助手，告别尬聊时代！**
+
+---
+
+### 🌟 如果这个项目拯救了你的聊天困境
+
+**请给个 ⭐️ Star 支持一下！让更多社恐朋友看到这个神器！**
+
+### 🥂 干杯！一起拥抱美好的聊天体验！
+
+<img src="https://media.giphy.com/media/8Iv5lqKwKsZ2g/giphy.gif" width="180"/>
+
+*抖音黄脸干杯表情包同款* 🍷
+
+<br>
+
+<img src="https://github.com/user-attachments/assets/cheers-emoji-final.png" width="120" alt="可爱黄脸干杯"/>
+
+*🍻 为告别尬聊干杯！* ✨
+
 </div>
