@@ -113,7 +113,7 @@ public class EmotionRadarController {
         // 文件验证优化
         ThrowUtils.throwIf(file == null || file.isEmpty(), ErrorCode.PARAMS_ERROR, "上传的文件不能为空");
         // 文件大小限制 (10MB)
-        ThrowUtils.throwIf(file.getSize() > 10 * 1024 * 1024, ErrorCode.PARAMS_ERROR, "文件大小不能超过10MB");
+//        ThrowUtils.throwIf(file.getSize() > 10 * 1024 * 1024, ErrorCode.PARAMS_ERROR, "文件大小不能超过10MB");
         // 文件类型验证
         String contentType = file.getContentType();
         ThrowUtils.throwIf(contentType == null || !contentType.startsWith("image/"), ErrorCode.PARAMS_ERROR, "文件大小不能超过10MB");

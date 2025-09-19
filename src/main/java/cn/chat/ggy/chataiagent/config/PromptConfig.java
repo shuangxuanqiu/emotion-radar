@@ -45,4 +45,5 @@ public class PromptConfig {
             throw new RuntimeException("Failed to load image analysis prompt", e);
         }
     }
+
 }

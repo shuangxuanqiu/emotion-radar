@@ -13,6 +13,10 @@ spring:
       chat-vl:
         options:
           model: qwen-vl-max
+      # DeepSeek 模型配置
+      deepseek:
+        options:
+          model: deepseek-v3
     ollama:
       base-url: http://localhost:11434
       chat:

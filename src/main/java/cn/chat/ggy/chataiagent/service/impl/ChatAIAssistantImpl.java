@@ -1,6 +1,7 @@
 package cn.chat.ggy.chataiagent.service.impl;
 
 import cn.chat.ggy.chataiagent.Constant.AppConstant;
+import cn.chat.ggy.chataiagent.app.DeepSeekAPP;
 import cn.chat.ggy.chataiagent.model.ImageOcr.UserInfoList;
 import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 import cn.chat.ggy.chataiagent.model.saver.HtmlCodeResult;
@@ -28,6 +29,8 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
 
     @Resource
     private ChatBotApp chatBotApp;
+    @Resource
+    private DeepSeekAPP deepSeekAPP;
     @Resource
     private ImageAnalysisAPP imageAnalysisAPP;
     @Resource
@@ -61,20 +64,20 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
                 log.info("开始处理图片，文件名: {}, 大小: {} bytes", file.getOriginalFilename(), file.getSize());
                 // todo 待优化，现在，先暂时废弃缓存
 //                // 计算文件哈希值用于缓存
-//                byte[] fileBytes = file.getBytes();
-//                fileHash = cacheService.calculateFileHash(fileBytes);
+//               byte[] fileBytes = file.getBytes();
+//               fileHash = cacheService.calculateFileHash(fileBytes);
 //
-//                // 尝试从缓存获取分析结果
-//                ResultInfo cachedResult = cacheService.getCachedImageAnalysisResult(fileHash, emotionalIndex);
-//                if (cachedResult != null) {
-//                    long endTime = System.currentTimeMillis();
-//                    log.info("使用缓存结果 - 耗时: {}ms, chatId: {}, fileHash: {}",
-//                            (endTime - startTime), chatId, fileHash);
-//                    return cachedResult;
-//                }
-                // 缓存未命中，执行图片分析
-                log.info("缓存未命中，开始图片分析 - fileHash: {}", fileHash);
-                
+//               // 尝试从缓存获取分析结果
+//               ResultInfo cachedResult = cacheService.getCachedImageAnalysisResult(fileHash, emotionalIndex);
+//               if (cachedResult != null) {
+//                   long endTime = System.currentTimeMillis();
+//                   log.info("使用缓存结果 - 耗时: {}ms, chatId: {}, fileHash: {}",
+//                           (endTime - startTime), chatId, fileHash);
+//                   return cachedResult;
+//               }
+//                // 缓存未命中，执行图片分析
+//                log.info("缓存未命中，开始图片分析 - fileHash: {}", fileHash);
+//
                 // 保存图片文件
                 imagePath = imageAnalysisService.saveImageFile(file);
                 log.info("图片保存成功，路径: {}", imagePath);
@@ -105,7 +108,8 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
             
             // 第三步：进行AI聊天
             log.info("开始AI聊天处理，chatId: {}, 消息长度: {}", chatId, chatMessage.length());
-            ResultInfo result = chatBotApp.doChat(chatMessage, chatId);
+//            ResultInfo result = chatBotApp.doChat(chatMessage, chatId);
+            ResultInfo result = deepSeekAPP.doChat(chatMessage, chatId); // 更换为 deepseek 的模型
             log.info("AI聊天处理完成，chatId: {}", chatId);
             
             // 如果有图片且结果有效，缓存分析结果
