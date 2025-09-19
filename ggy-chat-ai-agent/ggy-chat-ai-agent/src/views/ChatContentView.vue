@@ -308,28 +308,53 @@ const columns: TableColumnsType = [
 const loadData = async () => {
     loading.value = true
     try {
-        // 统一使用 page3 接口 (/api/chatContent/page)
-        const params = {
-            page: {
-                pageNumber: pagination.current,
+        // 检查是否有搜索参数
+        const hasSearchParams = searchForm.chatId || searchForm.userId !== undefined
+
+        let response: any
+
+        if (hasSearchParams) {
+            // 有参数时使用 listChatContentByPage 接口 (POST /chatContent/list/page/vo)
+            const params: API.ChatContentQueryRequest = {
+                pageNum: pagination.current,
                 pageSize: pagination.pageSize,
-                // 添加搜索参数到page对象中
-                ...(searchForm.chatId && { chatId: searchForm.chatId }),
-                ...(searchForm.userId !== undefined && { userId: searchForm.userId })
+                chatId: searchForm.chatId || undefined,
+                userId: searchForm.userId
             }
-        }
 
-        console.log('对话内容-使用page3接口-发送的参数:', params)
-        const response = await api.duihuaneirongguanli.page3(params)
-        console.log('对话内容-page3接口-API完整响应:', response)
+            console.log('对话内容-有参数查询-发送的参数:', params)
+            response = await api.duihuaneirongguanli.listChatContentByPage(params)
+            console.log('对话内容-有参数查询-API完整响应:', response)
 
-        if (response && response.data) {
-            console.log('对话内容-page3接口-响应数据:', response.data)
-            dataSource.value = response.data.records || []
-            pagination.total = response.data.totalRow || 0
+            if (response && response.data && response.data.data) {
+                console.log('对话内容-有参数查询-响应数据:', response.data.data)
+                dataSource.value = response.data.data.records || []
+                pagination.total = response.data.data.totalRow || 0
+            } else {
+                console.warn('对话内容-有参数查询-响应数据格式异常:', response)
+                message.warning('响应数据格式异常')
+            }
         } else {
-            console.warn('对话内容-page3接口-响应数据格式异常:', response)
-            message.warning('响应数据格式异常')
+            // 无参数时使用 page3 接口 (GET /chatContent/page)
+            const params = {
+                page: {
+                    pageNumber: pagination.current,
+                    pageSize: pagination.pageSize
+                }
+            }
+
+            console.log('对话内容-无参数查询-发送的参数:', params)
+            response = await api.duihuaneirongguanli.page3(params)
+            console.log('对话内容-无参数查询-API完整响应:', response)
+
+            if (response && response.data) {
+                console.log('对话内容-无参数查询-响应数据:', response.data)
+                dataSource.value = response.data.records || []
+                pagination.total = response.data.totalRow || 0
+            } else {
+                console.warn('对话内容-无参数查询-响应数据格式异常:', response)
+                message.warning('响应数据格式异常')
+            }
         }
     } catch (error) {
         console.error('对话内容-加载数据失败:', error)

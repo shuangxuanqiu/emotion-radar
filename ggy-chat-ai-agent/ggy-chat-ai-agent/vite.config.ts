@@ -15,7 +15,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8123',
+        // target: 'http://localhost:8123',
+        target: 'http://ddns.6010.top:12844',
         changeOrigin: true,
         secure: false,
       },

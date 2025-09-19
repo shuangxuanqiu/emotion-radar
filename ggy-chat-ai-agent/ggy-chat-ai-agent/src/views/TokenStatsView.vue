@@ -326,11 +326,14 @@ const columns: TableColumnsType = [
 const loadData = async () => {
     loading.value = true
     try {
+        // TokenStatsView只有page2接口，统一使用该接口
         const params = {
             page: {
                 pageNumber: pagination.current,
                 pageSize: pagination.pageSize,
-                ...searchForm
+                // 只在有值时添加搜索参数
+                ...(searchForm.chatId && { chatId: searchForm.chatId }),
+                ...(searchForm.userId !== undefined && { userId: searchForm.userId })
             }
         }
 
