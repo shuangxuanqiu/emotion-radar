@@ -19,42 +19,46 @@
         </div>
 
         <!-- 统计概览卡片 -->
-        <a-row :gutter="16" class="stats-overview">
-            <a-col :span="6">
-                <a-card>
+        <a-row :gutter="[16, 16]" class="stats-overview">
+            <a-col :xs="12" :sm="12" :md="6" :lg="6">
+                <a-card class="stats-card" :loading="loading">
                     <a-statistic
                         title="总反馈数"
                         :value="statsData.totalFeedbacks"
-                        :value-style="{ color: '#3f8600' }"
+                        :value-style="{ color: '#3f8600', fontWeight: '600' }"
+                        prefix="📊"
                     />
                 </a-card>
             </a-col>
-            <a-col :span="6">
-                <a-card>
+            <a-col :xs="12" :sm="12" :md="6" :lg="6">
+                <a-card class="stats-card" :loading="loading">
                     <a-statistic
                         title="正常复制"
                         :value="statsData.normalCopy"
-                        :value-style="{ color: '#1890ff' }"
+                        :value-style="{ color: '#1890ff', fontWeight: '600' }"
+                        prefix="✅"
                     />
                 </a-card>
             </a-col>
-            <a-col :span="6">
-                <a-card>
+            <a-col :xs="12" :sm="12" :md="6" :lg="6">
+                <a-card class="stats-card" :loading="loading">
                     <a-statistic
                         title="不满意反馈"
                         :value="statsData.dissatisfiedFeedback"
-                        :value-style="{ color: '#ff4d4f' }"
+                        :value-style="{ color: '#ff4d4f', fontWeight: '600' }"
+                        prefix="❌"
                     />
                 </a-card>
             </a-col>
-            <a-col :span="6">
-                <a-card>
+            <a-col :xs="12" :sm="12" :md="6" :lg="6">
+                <a-card class="stats-card" :loading="loading">
                     <a-statistic
                         title="满意度"
                         :value="statsData.satisfactionRate"
                         suffix="%"
                         :precision="1"
-                        :value-style="{ color: '#52c41a' }"
+                        :value-style="{ color: '#52c41a', fontWeight: '600' }"
+                        prefix="🎯"
                     />
                 </a-card>
             </a-col>
@@ -129,13 +133,36 @@
         </a-modal>
 
         <!-- 数据表格 -->
-        <a-card :bordered="false">
-            <a-spin :spinning="loading" tip="加载中...">
+        <a-card :bordered="false" class="table-card">
+            <template #title>
+                <div class="table-header">
+                    <div class="table-title">
+                        <h3>用户反馈列表</h3>
+                        <a-tag v-if="!loading" color="blue">共 {{ pagination.total }} 条记录</a-tag>
+                    </div>
+                    <div class="table-actions">
+                        <a-tooltip title="刷新数据">
+                            <a-button type="text" :loading="loading" @click="loadData" :icon="h(ReloadOutlined)" />
+                        </a-tooltip>
+                    </div>
+                </div>
+            </template>
+            <a-spin :spinning="loading" tip="正在加载数据...">
                 <template #indicator>
-                    <LoadingSpinner />
+                    <LoadingSpinner text="正在加载用户反馈..." />
                 </template>
-                <a-table :dataSource="dataSource" :columns="columns" :loading="false" :pagination="pagination"
-                    @change="handleTableChange" row-key="id">
+                <div class="table-container">
+                    <a-table 
+                        :dataSource="dataSource" 
+                        :columns="columns" 
+                        :loading="false" 
+                        :pagination="pagination"
+                        @change="handleTableChange" 
+                        row-key="id"
+                        :scroll="{ x: 1200 }"
+                        size="middle"
+                        :show-sorter-tooltip="false"
+                    >
                 <template #bodyCell="{ column, record }">
                     <template v-if="column.key === 'action'">
                         <a-space>
@@ -163,8 +190,12 @@
                             {{ record.isDelete === 0 ? '正常' : '已删除' }}
                         </a-tag>
                     </template>
+                    <template v-else-if="column.key === 'createTime'">
+                        <span>{{ formatTime(record.createTime) }}</span>
+                    </template>
                 </template>
-            </a-table>
+                    </a-table>
+                </div>
             </a-spin>
         </a-card>
 
@@ -218,14 +249,14 @@
                         {{ viewData.messageType === 0 ? '正常复制' : '不满意反馈' }}
                     </a-tag>
                 </a-descriptions-item>
-                <a-descriptions-item label="创建时间">{{ viewData.createTime }}</a-descriptions-item>
-                <a-descriptions-item label="更新时间">{{ viewData.updateTime }}</a-descriptions-item>
+                <a-descriptions-item label="创建时间">{{ formatTime(viewData.createTime) }}</a-descriptions-item>
+                <a-descriptions-item label="更新时间">{{ formatTime(viewData.updateTime) }}</a-descriptions-item>
                 <a-descriptions-item label="状态">
                     <a-tag :color="viewData.isDelete === 0 ? 'green' : 'red'">
                         {{ viewData.isDelete === 0 ? '正常' : '已删除' }}
                     </a-tag>
                 </a-descriptions-item>
-                <a-descriptions-item label="编辑时间">{{ viewData.editTime }}</a-descriptions-item>
+                <a-descriptions-item label="编辑时间">{{ formatTime(viewData.editTime) }}</a-descriptions-item>
                 <a-descriptions-item label="反馈消息" :span="2">
                     <div style="max-height: 200px; overflow-y: auto; white-space: pre-wrap;">{{ viewData.feedBackMessage
                         }}
@@ -244,12 +275,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, h } from 'vue'
 import { message } from 'ant-design-vue'
-import { PlusOutlined, SearchOutlined, BarChartOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, SearchOutlined, BarChartOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 import api from '@/api'
 import type { TableColumnsType } from 'ant-design-vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
+import { formatTime } from '@/utils/time'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { PieChart, BarChart } from 'echarts/charts'
@@ -601,54 +633,29 @@ const showStatsModal = async () => {
 const loadData = async () => {
     loading.value = true
     try {
-        // 检查是否有搜索参数
-        const hasSearchParams = searchForm.chatId || 
-                               searchForm.messageType !== undefined || 
-                               searchForm.userId !== undefined
-
-        let response: any
-
-        if (hasSearchParams) {
-            // 有参数时使用新接口 listUserVoByPage (POST方法)
-            const params: API.FeedbackQueryRequest = {
-                pageNum: pagination.current,
+        // 统一使用 page1 接口 (/feedbackMessage/page)
+        const params = {
+            page: {
+                pageNumber: pagination.current,
                 pageSize: pagination.pageSize,
-                chatId: searchForm.chatId || undefined,
-                messageType: searchForm.messageType,
-                userId: searchForm.userId
+                // 添加搜索参数到page对象中
+                ...(searchForm.chatId && { chatId: searchForm.chatId }),
+                ...(searchForm.messageType !== undefined && { messageType: searchForm.messageType }),
+                ...(searchForm.userId !== undefined && { userId: searchForm.userId })
             }
+        }
 
-            console.log('用户反馈-使用新接口-发送的参数:', params)
-            response = await api.yonghufankuiguanli.listUserVoByPage(params)
-            console.log('用户反馈-新接口-API完整响应:', response)
+        console.log('用户反馈-使用page1接口-发送的参数:', params)
+        const response = await api.yonghufankuiguanli.page1(params)
+        console.log('用户反馈-page1接口-API完整响应:', response)
 
-            if (response && response.data && response.data.data) {
-                console.log('用户反馈-新接口-响应数据:', response.data.data)
-                dataSource.value = response.data.data.records || []
-                pagination.total = response.data.data.totalRow || 0
-            } else {
-                console.warn('用户反馈-新接口-响应数据格式异常:', response)
-                message.warning('响应数据格式异常')
-            }
+        if (response && response.data) {
+            console.log('用户反馈-page1接口-响应数据:', response.data)
+            dataSource.value = response.data.records || []
+            pagination.total = response.data.totalRow || 0
         } else {
-            // 无参数时使用老接口 list1 (GET方法，获取所有数据)
-            console.log('用户反馈-使用老接口-无参数查询')
-            response = await api.yonghufankuiguanli.list1()
-            console.log('用户反馈-老接口-API完整响应:', response)
-
-            if (response && response.data) {
-                console.log('用户反馈-老接口-响应数据:', response.data)
-                const allData = response.data || []
-                
-                // 手动实现分页逻辑
-                const startIndex = (pagination.current - 1) * pagination.pageSize
-                const endIndex = startIndex + pagination.pageSize
-                dataSource.value = allData.slice(startIndex, endIndex)
-                pagination.total = allData.length
-            } else {
-                console.warn('用户反馈-老接口-响应数据格式异常:', response)
-                message.warning('响应数据格式异常')
-            }
+            console.warn('用户反馈-page1接口-响应数据格式异常:', response)
+            message.warning('响应数据格式异常')
         }
     } catch (error) {
         console.error('用户反馈-加载数据失败:', error)
@@ -798,6 +805,8 @@ onMounted(() => {
     max-width: 1600px;
     margin: 0 auto;
     width: 100%;
+    background: #f5f5f5;
+    min-height: 100vh;
 }
 
 .page-header {
@@ -805,17 +814,31 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+    padding: 20px 0;
 }
 
 .page-header h2 {
     margin: 0;
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 28px;
+    font-weight: 700;
     color: #1a1a1a;
+    background: linear-gradient(135deg, #1890ff, #52c41a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .search-card {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.search-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
 }
 
 /* 统计概览样式 */
@@ -823,10 +846,58 @@ onMounted(() => {
     margin-bottom: 24px;
 }
 
-.stats-overview .ant-card {
+.stats-card {
     text-align: center;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fff, #fafafa);
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.table-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border: none;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+}
+
+.table-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.table-title h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.table-container {
+    margin: -16px;
+    margin-top: 0;
 }
 
 /* 统计分析弹窗样式 */
@@ -856,54 +927,217 @@ onMounted(() => {
 :deep(.ant-table-wrapper) {
     .ant-table {
         font-size: 14px;
+        border-radius: 8px;
+        overflow: hidden;
     }
     
     .ant-table-thead > tr > th {
-        background: #fafafa;
+        background: linear-gradient(135deg, #fafafa, #f0f0f0);
         font-weight: 600;
-        padding: 12px 8px;
+        padding: 16px 12px;
+        border-bottom: 2px solid #e8e8e8;
+        color: #1a1a1a;
+        font-size: 14px;
+    }
+    
+    .ant-table-tbody > tr {
+        transition: all 0.2s ease;
+    }
+    
+    .ant-table-tbody > tr:hover {
+        background: #f8f9fa;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
     
     .ant-table-tbody > tr > td {
-        padding: 12px 8px;
+        padding: 14px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
     }
     
     .ant-table-scroll {
         overflow-x: auto;
     }
+    
+    .ant-pagination {
+        margin: 24px 0 8px;
+        text-align: center;
+    }
+}
+
+/* 按钮样式优化 */
+:deep(.ant-btn) {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+:deep(.ant-btn-primary) {
+    background: linear-gradient(135deg, #1890ff, #40a9ff);
+    border: none;
+    box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+}
+
+:deep(.ant-btn-primary:hover) {
+    background: linear-gradient(135deg, #40a9ff, #1890ff);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
+/* 表单样式优化 */
+:deep(.ant-form-item-label > label) {
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+:deep(.ant-input, .ant-input-number, .ant-select-selector) {
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+:deep(.ant-input:focus, .ant-input-number:focus, .ant-select-focused .ant-select-selector) {
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 标签样式优化 */
+:deep(.ant-tag) {
+    border-radius: 12px;
+    font-weight: 500;
+    padding: 2px 8px;
+}
+
+/* 统计卡片样式优化 */
+:deep(.ant-statistic-title) {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+:deep(.ant-statistic-content) {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* 模态框样式优化 */
+:deep(.ant-modal-content) {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+:deep(.ant-modal-header) {
+    background: linear-gradient(135deg, #fafafa, #f0f0f0);
+    border-bottom: 1px solid #e8e8e8;
+    padding: 20px 24px;
+}
+
+:deep(.ant-modal-title) {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* 描述列表样式优化 */
+:deep(.ant-descriptions) {
+    .ant-descriptions-item-label {
+        font-weight: 600;
+        color: #1a1a1a;
+        background: #fafafa;
+    }
+    
+    .ant-descriptions-item-content {
+        color: #4a4a4a;
+    }
 }
 
 /* 响应式设计 */
+@media (max-width: 1200px) {
+    .user-feedback-management {
+        max-width: 100%;
+        padding: 20px;
+    }
+}
+
 @media (max-width: 768px) {
     .user-feedback-management {
         padding: 16px;
-        max-width: 100%;
+        background: #fff;
     }
 
     .page-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
+        padding: 16px 0;
+    }
+    
+    .page-header h2 {
+        font-size: 24px;
     }
     
     .stats-overview {
         margin-bottom: 16px;
     }
     
-    .stats-overview .ant-col {
-        margin-bottom: 8px;
+    .search-card, .table-card {
+        border-radius: 8px;
+        margin: 0 -4px 16px;
+    }
+    
+    .stats-card:hover, .search-card:hover {
+        transform: none;
+    }
+    
+    .table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
     }
     
     .chart-card {
         margin-bottom: 16px;
+        border-radius: 8px;
     }
     
     :deep(.ant-table-wrapper) {
         .ant-table-thead > tr > th,
         .ant-table-tbody > tr > td {
-            padding: 8px 4px;
+            padding: 8px 6px;
             font-size: 12px;
         }
+        
+        .ant-table-tbody > tr:hover {
+            transform: none;
+        }
+    }
+    
+    :deep(.ant-modal) {
+        margin: 16px;
+        max-width: calc(100vw - 32px);
+    }
+    
+    :deep(.ant-statistic-content) {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h2 {
+        font-size: 20px;
+    }
+    
+    :deep(.ant-form-item) {
+        margin-bottom: 16px;
+    }
+    
+    :deep(.ant-space-item) {
+        margin-bottom: 8px;
+    }
+    
+    :deep(.ant-statistic-content) {
+        font-size: 18px;
     }
 }
 </style>

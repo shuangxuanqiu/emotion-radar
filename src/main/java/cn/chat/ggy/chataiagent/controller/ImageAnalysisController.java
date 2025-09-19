@@ -6,6 +6,7 @@ import cn.chat.ggy.chataiagent.exception.ErrorCode;
 import cn.chat.ggy.chataiagent.exception.ThrowUtils;
 import cn.chat.ggy.chataiagent.model.dto.imageanalysis.ImageAnalysisQueryRequest;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,7 +108,7 @@ public class ImageAnalysisController {
     @GetMapping("page")
     @Operation(summary = "分页查询图片解析信息", description = "根据分页参数查询图片解析信息列表")
     public Page<ImageAnalysis> page(@Parameter(description = "分页查询参数", required = true) Page<ImageAnalysis> page) {
-        return imageAnalysisService.page(page);
+        return imageAnalysisService.page(page, QueryWrapper.create().orderBy("createTime",false));
     }
 
     /**

@@ -77,6 +77,6 @@ public class ChatContentServiceImpl extends ServiceImpl<ChatContentMapper, ChatC
         return QueryWrapper.create()
                 .eq("id", id)
                 .eq("chatId", chatId)
-                .orderBy(sortField, "ascend".equals(sortOrder));
+                .orderBy(sortField, "ASC".equals(sortOrder));
     }
 }

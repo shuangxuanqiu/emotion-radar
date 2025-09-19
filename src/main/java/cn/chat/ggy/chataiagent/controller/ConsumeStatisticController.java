@@ -1,6 +1,7 @@
 package cn.chat.ggy.chataiagent.controller;
 
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -98,7 +99,7 @@ public class ConsumeStatisticController {
     @GetMapping("page")
     @Operation(summary = "分页查询Token消费统计", description = "根据分页参数查询Token消费统计列表")
     public Page<ConsumeStatistic> page(@Parameter(description = "分页查询参数", required = true) Page<ConsumeStatistic> page) {
-        return consumeStatisticService.page(page);
+        return consumeStatisticService.page(page, QueryWrapper.create().orderBy("createTime",false));
     }
 
 }

@@ -25,7 +25,7 @@ server:
   # 如果需要使用不同的端口，可以在这里修改
    port: 8123
 
-# 应用配置
+# 应用配置 - 生成的 html 中 反馈用的配置
 app:
   # 本地开发环境的基础 URL
   # base-url: http://localhost:8123

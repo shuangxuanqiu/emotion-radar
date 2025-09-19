@@ -6,6 +6,7 @@ import cn.chat.ggy.chataiagent.exception.ErrorCode;
 import cn.chat.ggy.chataiagent.exception.ThrowUtils;
 import cn.chat.ggy.chataiagent.model.dto.chatcontent.ChatContentQueryRequest;
 import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -103,7 +104,7 @@ public class ChatContentController {
     @GetMapping("page")
     @Operation(summary = "分页查询对话内容", description = "根据分页参数查询对话内容列表")
     public Page<ChatContent> page(@Parameter(description = "分页查询参数", required = true) Page<ChatContent> page) {
-        return chatContentService.page(page);
+        return chatContentService.page(page,QueryWrapper.create().orderBy("createTime",false));
     }
 
     /**
@@ -115,6 +116,10 @@ public class ChatContentController {
     @Operation(summary = "分页 参数 查询对话内容", description = "根据分页参数和chatId查询对话内容列表")
     public BaseResponse<Page<ChatContent>> listChatContentByPage(@RequestBody ChatContentQueryRequest chatContentQueryRequest) {
         ThrowUtils.throwIf(chatContentQueryRequest == null, ErrorCode.PARAMS_ERROR);
+        //排序
+        chatContentQueryRequest.setSortField("id");
+        chatContentQueryRequest.setSortOrder("ASC");
+
         long pageNum = chatContentQueryRequest.getPageNum();
         long pageSize = chatContentQueryRequest.getPageSize();
         Page<ChatContent> chatContentPage = chatContentService.page(Page.of(pageNum, pageSize),
