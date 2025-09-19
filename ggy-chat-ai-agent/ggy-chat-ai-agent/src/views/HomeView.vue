@@ -34,20 +34,20 @@ const testAPI = async () => {
 </script>
 
 <template>
-  <div class="home-page">
+  <div class="home-page home-theme">
     <div class="hero-section">
       <h1 class="hero-title">欢迎来到情感雷达</h1>
       <p class="hero-description">
         这是一个基于 Vue 3 + Ant Design Vue 构建的现代化 Web 应用
       </p>
       <div class="hero-buttons">
-        <a-button type="primary" size="large" class="hero-button">
+        <a-button type="primary" size="large" class="hero-button colorful-btn-primary">
           开始探索
         </a-button>
         <a-button 
           type="default" 
           size="large" 
-          class="hero-button test-button" 
+          class="hero-button test-button colorful-btn-secondary" 
           :loading="loading"
           @click="testAPI"
         >
@@ -58,7 +58,7 @@ const testAPI = async () => {
 
     <!-- API测试结果显示区域 -->
     <div v-if="testResult" class="test-result-section">
-      <a-card title="API测试结果" class="result-card">
+      <a-card title="API测试结果" class="result-card colorful-stats-card">
         <pre class="result-content">{{ JSON.stringify(testResult, null, 2) }}</pre>
       </a-card>
     </div>
@@ -66,17 +66,17 @@ const testAPI = async () => {
     <div class="feature-section">
       <a-row :gutter="[24, 24]">
         <a-col :xs="24" :sm="12" :md="8">
-          <a-card title="现代化设计" class="feature-card">
+          <a-card title="现代化设计" class="feature-card colorful-stats-card">
             <p>采用 Ant Design Vue 组件库，提供优雅的用户界面</p>
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="12" :md="8">
-          <a-card title="响应式布局" class="feature-card">
+          <a-card title="响应式布局" class="feature-card colorful-stats-card">
             <p>完美适配各种设备，从手机到桌面端都有良好体验</p>
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="12" :md="8">
-          <a-card title="Vue 3 组合式 API" class="feature-card">
+          <a-card title="Vue 3 组合式 API" class="feature-card colorful-stats-card">
             <p>使用最新的 Vue 3 技术栈，代码更简洁高效</p>
           </a-card>
         </a-col>

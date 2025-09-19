@@ -1,5 +1,5 @@
 <template>
-  <div class="about-page">
+  <div class="about-page home-theme">
     <div class="about-header">
       <h1 class="about-title">关于情感雷达</h1>
       <p class="about-subtitle">来自小扬的原创项目</p>
@@ -8,7 +8,7 @@
     <div class="about-content">
       <a-row :gutter="[32, 32]">
         <a-col :xs="24" :lg="12">
-          <a-card class="info-card">
+          <a-card class="info-card colorful-stats-card">
             <template #title>
               <span class="card-title">项目介绍</span>
             </template>
@@ -20,23 +20,23 @@
         </a-col>
 
         <a-col :xs="24" :lg="12">
-          <a-card class="info-card">
+          <a-card class="info-card colorful-stats-card">
             <template #title>
               <span class="card-title">技术栈</span>
             </template>
             <div class="tech-stack">
-              <a-tag color="blue">Vue 3</a-tag>
-              <a-tag color="green">TypeScript</a-tag>
-              <a-tag color="orange">Ant Design Vue</a-tag>
-              <a-tag color="purple">Vite</a-tag>
-              <a-tag color="red">Vue Router</a-tag>
-              <a-tag color="cyan">Pinia</a-tag>
+              <a-tag class="colorful-tag-primary">Vue 3</a-tag>
+              <a-tag class="colorful-tag-success">TypeScript</a-tag>
+              <a-tag class="colorful-tag-warning">Ant Design Vue</a-tag>
+              <a-tag class="colorful-tag-primary">Vite</a-tag>
+              <a-tag class="colorful-tag-success">Vue Router</a-tag>
+              <a-tag class="colorful-tag-warning">Pinia</a-tag>
             </div>
           </a-card>
         </a-col>
 
         <a-col :xs="24">
-          <a-card class="info-card">
+          <a-card class="info-card colorful-stats-card">
             <template #title>
               <span class="card-title">特性</span>
             </template>

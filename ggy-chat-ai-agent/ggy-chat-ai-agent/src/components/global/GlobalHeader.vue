@@ -77,14 +77,19 @@ const handleLogin = () => {
 
 <style scoped>
 .global-header {
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        0 1px 0 rgba(255, 255, 255, 0.5) inset;
     padding: 0;
-    height: 64px;
-    line-height: 64px;
+    height: 72px;
+    line-height: 72px;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1000;
+    transition: all 0.3s ease;
 }
 
 .header-content {
@@ -114,10 +119,14 @@ const handleLogin = () => {
 }
 
 .site-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1890ff;
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #1890ff, #52c41a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     white-space: nowrap;
+    letter-spacing: 0.5px;
 }
 
 .header-center {
@@ -129,7 +138,24 @@ const handleLogin = () => {
 .header-menu {
     border-bottom: none;
     background: transparent;
-    line-height: 64px;
+    line-height: 72px;
+}
+
+:deep(.ant-menu-item) {
+    border-radius: 8px;
+    margin: 0 4px;
+    transition: all 0.3s ease;
+}
+
+:deep(.ant-menu-item:hover) {
+    background: rgba(24, 144, 255, 0.1);
+    color: #1890ff;
+}
+
+:deep(.ant-menu-item-selected) {
+    background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), rgba(82, 196, 26, 0.1));
+    color: #1890ff;
+    font-weight: 600;
 }
 
 .header-right {

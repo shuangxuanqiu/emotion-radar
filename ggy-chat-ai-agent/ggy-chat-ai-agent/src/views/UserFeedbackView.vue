@@ -1,6 +1,6 @@
 <template>
-    <div class="user-feedback-management">
-        <div class="page-header">
+    <div class="user-feedback-management elegant-gradient-bg user-feedback-theme">
+        <div class="page-header colorful-page-header">
             <h2>用户反馈管理</h2>
             <a-space>
                 <a-button type="default" @click="showStatsModal">
@@ -9,7 +9,7 @@
                     </template>
                     统计分析
                 </a-button>
-                <a-button type="primary" @click="showCreateModal">
+                <a-button type="primary" class="colorful-btn-primary" @click="showCreateModal">
                     <template #icon>
                         <PlusOutlined />
                     </template>
@@ -65,8 +65,8 @@
         </a-row>
 
         <!-- 搜索栏 -->
-        <a-card class="search-card" :bordered="false">
-            <a-form layout="inline" :model="searchForm" @finish="handleSearch">
+        <a-card class="search-card colorful-search-card fade-in-up" :bordered="false">
+            <a-form layout="inline" :model="searchForm" @finish="handleSearch" class="colorful-form">
                 <a-form-item label="聊天ID">
                     <a-input v-model:value="searchForm.chatId" placeholder="请输入聊天ID" allow-clear />
                 </a-form-item>
@@ -133,7 +133,7 @@
         </a-modal>
 
         <!-- 数据表格 -->
-        <a-card :bordered="false" class="table-card">
+        <a-card :bordered="false" class="table-card colorful-card scale-in colorful-table">
             <template #title>
                 <div class="table-header">
                     <div class="table-title">
@@ -149,7 +149,7 @@
             </template>
             <a-spin :spinning="loading" tip="正在加载数据...">
                 <template #indicator>
-                    <LoadingSpinner text="正在加载用户反馈..." />
+                    <LoadingSpinner text="正在加载用户反馈..." type="pulse" theme="primary" />
                 </template>
                 <div class="table-container">
                     <a-table 

@@ -1,8 +1,8 @@
 <template>
-    <div class="token-stats-management">
-        <div class="page-header">
+    <div class="token-stats-management modern-gradient-bg token-stats-theme">
+        <div class="page-header colorful-page-header">
             <h2>Token消费统计管理</h2>
-            <a-button type="primary" @click="showCreateModal">
+            <a-button type="primary" class="colorful-btn-primary" @click="showCreateModal">
                 <template #icon>
                     <PlusOutlined />
                 </template>
@@ -11,8 +11,8 @@
         </div>
 
         <!-- 搜索栏 -->
-        <a-card class="search-card" :bordered="false">
-            <a-form layout="inline" :model="searchForm" @finish="handleSearch">
+        <a-card class="search-card colorful-search-card fade-in-up" :bordered="false">
+            <a-form layout="inline" :model="searchForm" @finish="handleSearch" class="colorful-form">
                 <a-form-item label="聊天ID">
                     <a-input v-model:value="searchForm.chatId" placeholder="请输入聊天ID" allow-clear />
                 </a-form-item>
@@ -60,7 +60,7 @@
         </a-row>
 
         <!-- 数据表格 -->
-        <a-card :bordered="false" class="table-card">
+        <a-card :bordered="false" class="table-card colorful-card scale-in colorful-table">
             <template #title>
                 <div class="table-header">
                     <div class="table-title">
@@ -76,7 +76,7 @@
             </template>
             <a-spin :spinning="loading" tip="正在加载数据...">
                 <template #indicator>
-                    <LoadingSpinner text="正在加载Token统计..." />
+                    <LoadingSpinner text="正在加载Token统计..." type="bounce" theme="gradient" />
                 </template>
                 <div class="table-container">
                     <a-table 

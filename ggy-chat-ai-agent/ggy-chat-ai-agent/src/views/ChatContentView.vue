@@ -1,8 +1,8 @@
 <template>
-    <div class="chat-content-management">
-        <div class="page-header">
+    <div class="chat-content-management modern-gradient-bg chat-content-theme">
+        <div class="page-header colorful-page-header">
             <h2>对话内容管理</h2>
-            <a-button type="primary" @click="showCreateModal">
+            <a-button type="primary" class="colorful-btn-primary" @click="showCreateModal">
                 <template #icon>
                     <PlusOutlined />
                 </template>
@@ -11,8 +11,8 @@
         </div>
 
         <!-- 搜索栏 -->
-        <a-card class="search-card" :bordered="false">
-            <a-form layout="inline" :model="searchForm" @finish="handleSearch">
+        <a-card class="search-card colorful-search-card fade-in-up" :bordered="false">
+            <a-form layout="inline" :model="searchForm" @finish="handleSearch" class="colorful-form">
                 <a-form-item label="聊天ID">
                     <a-input v-model:value="searchForm.chatId" placeholder="请输入聊天ID" allow-clear />
                 </a-form-item>
@@ -32,12 +32,12 @@
         </a-card>
 
         <!-- 数据表格 -->
-        <a-card :bordered="false" class="table-card">
+        <a-card :bordered="false" class="table-card colorful-card scale-in colorful-table">
             <template #title>
                 <div class="table-header">
                     <div class="table-title">
                         <h3>对话内容列表</h3>
-                        <a-tag v-if="!loading" color="blue">共 {{ pagination.total }} 条记录</a-tag>
+                        <a-tag v-if="!loading" class="colorful-tag-primary">共 {{ pagination.total }} 条记录</a-tag>
                     </div>
                     <div class="table-actions">
                         <a-tooltip title="刷新数据">
@@ -48,7 +48,7 @@
             </template>
             <a-spin :spinning="loading" tip="正在加载数据...">
                 <template #indicator>
-                    <LoadingSpinner text="正在加载对话内容..." />
+                    <LoadingSpinner text="正在加载对话内容..." type="spin" theme="gradient" />
                 </template>
                 <div class="table-container">
                     <a-table 
@@ -101,7 +101,7 @@
                         <span v-else style="color: #ccc;">暂无链接</span>
                     </template>
                     <template v-else-if="column.key === 'isDelete'">
-                        <a-tag :color="record.isDelete === 0 ? 'green' : 'red'">
+                        <a-tag :class="record.isDelete === 0 ? 'colorful-tag-success' : 'colorful-tag-warning'">
                             {{ record.isDelete === 0 ? '正常' : '已删除' }}
                         </a-tag>
                     </template>
@@ -116,7 +116,7 @@
 
         <!-- 创建/编辑弹窗 -->
         <a-modal v-model:open="modalVisible" :title="modalTitle" :width="800" @ok="handleSubmit" @cancel="handleCancel"
-            :confirm-loading="submitLoading">
+            :confirm-loading="submitLoading" class="colorful-modal">
             <a-form ref="formRef" :model="formData" :rules="formRules" layout="vertical">
                 <a-row :gutter="16">
                     <a-col :span="12">
@@ -156,7 +156,7 @@
         </a-modal>
 
         <!-- 查看详情弹窗 -->
-        <a-modal v-model:open="viewModalVisible" title="查看对话内容详情" :width="800" :footer="null">
+        <a-modal v-model:open="viewModalVisible" title="查看对话内容详情" :width="800" :footer="null" class="colorful-modal">
             <a-descriptions :column="2" bordered>
                 <a-descriptions-item label="ID">{{ viewData.id }}</a-descriptions-item>
                 <a-descriptions-item label="用户ID">{{ viewData.userId }}</a-descriptions-item>
@@ -165,7 +165,7 @@
                 <a-descriptions-item label="创建时间">{{ formatTime(viewData.createTime) }}</a-descriptions-item>
                 <a-descriptions-item label="更新时间">{{ formatTime(viewData.updateTime) }}</a-descriptions-item>
                 <a-descriptions-item label="状态">
-                    <a-tag :color="viewData.isDelete === 0 ? 'green' : 'red'">
+                    <a-tag :class="viewData.isDelete === 0 ? 'colorful-tag-success' : 'colorful-tag-warning'">
                         {{ viewData.isDelete === 0 ? '正常' : '已删除' }}
                     </a-tag>
                 </a-descriptions-item>
@@ -514,8 +514,23 @@ onMounted(() => {
     max-width: 1600px;
     margin: 0 auto;
     width: 100%;
-    background: #f5f5f5;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     min-height: 100vh;
+    position: relative;
+}
+
+.chat-content-management::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.03) 0%, transparent 50%);
+    pointer-events: none;
 }
 
 .page-header {
@@ -523,7 +538,9 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
-    padding: 20px 0;
+    padding: 32px 0;
+    position: relative;
+    z-index: 1;
 }
 
 .page-header h2 {
@@ -539,23 +556,61 @@ onMounted(() => {
 
 .search-card {
     margin-bottom: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border: none;
-    transition: all 0.3s ease;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        0 1px 0 rgba(255, 255, 255, 0.5) inset;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    z-index: 1;
 }
 
 .search-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        0 1px 0 rgba(255, 255, 255, 0.6) inset;
+    transform: translateY(-4px) scale(1.01);
+}
+
+.search-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(24, 144, 255, 0.05) 0%, rgba(82, 196, 26, 0.05) 100%);
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.search-card:hover::before {
+    opacity: 1;
 }
 
 .table-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    border: none;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.12),
+        0 1px 0 rgba(255, 255, 255, 0.7) inset;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    z-index: 1;
+}
+
+.table-card:hover {
+    box-shadow: 
+        0 25px 70px rgba(0, 0, 0, 0.15),
+        0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    transform: translateY(-2px);
 }
 
 .table-header {
