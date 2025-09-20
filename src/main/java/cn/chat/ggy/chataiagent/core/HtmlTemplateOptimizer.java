@@ -167,22 +167,30 @@ public class HtmlTemplateOptimizer {
                         background: linear-gradient(145deg, #007bff, #0056b3);
                         color: white; 
                         border: none; 
-                        padding: 10px 16px; 
+                        padding: 12px 18px; 
                         border-radius: 8px; 
                         cursor: pointer; 
                         font-size: 14px; 
                         font-weight: 500;
                         transition: all 0.3s ease;
                         box-shadow: 0 2px 8px rgba(0,123,255,0.3);
-                        min-width: 60px;
-                        min-height: 44px;
+                        min-width: 70px;
+                        min-height: 48px;
                         text-align: center;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        /* 增加触摸目标区域 */
+                        /* 增强触摸目标区域和体验 */
                         touch-action: manipulation;
                         user-select: none;
+                        -webkit-tap-highlight-color: transparent;
+                        outline: none;
+                        /* 防止双击缩放 */
+                        -webkit-touch-callout: none;
+                        -webkit-user-select: none;
+                        -khtml-user-select: none;
+                        -moz-user-select: none;
+                        -ms-user-select: none;
                     }
                     .copy-btn:hover { 
                         transform: translateY(-1px);
@@ -444,14 +452,16 @@ public class HtmlTemplateOptimizer {
                         }
                         
                         .copy-btn {
-                            padding: 12px 16px;
-                            font-size: 14px;
-                            font-weight: 500;
-                            min-width: 70px;
-                            min-height: 48px;
+                            padding: 14px 20px;
+                            font-size: 15px;
+                            font-weight: 600;
+                            min-width: 80px;
+                            min-height: 52px;
                             top: 12px;
                             right: 12px;
                             border-radius: 10px;
+                            /* 移动端增强触摸体验 */
+                            box-shadow: 0 3px 12px rgba(0,123,255,0.4);
                         }
                         
                         .background-grid {
@@ -565,6 +575,25 @@ public class HtmlTemplateOptimizer {
                 <script>
                     // 存储 chatId
                     const CHAT_ID = '{{CHAT_ID}}';
+                    
+                    // 改进的复制函数 - 使用data属性避免JavaScript注入
+                    function copyFromButton(button) {
+                        try {
+                            const text = button.getAttribute('data-content');
+                            const emotionalIndex = button.getAttribute('data-emotion');
+                            
+                            if (!text) {
+                                console.error('复制内容为空');
+                                showToast('复制失败：内容为空 (╯°□°）╯');
+                                return;
+                            }
+                            
+                            copyToClipboard(text, button, emotionalIndex);
+                        } catch (error) {
+                            console.error('复制操作失败:', error);
+                            showToast('复制失败，请重试 (╯°□°）╯');
+                        }
+                    }
                     
                     function copyToClipboard(text, button, emotionalIndex) {
                         // 检查按钮是否已经发送过反馈请求
@@ -738,20 +767,33 @@ public class HtmlTemplateOptimizer {
                             }
                         };
                         
+                        // 增强错误处理和超时控制
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+                        
                         fetch('{{BASE_URL}}/api/chat-ai/chat/user/feedback', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify(requestData)
+                            body: JSON.stringify(requestData),
+                            signal: controller.signal
                         }).then(response => {
+                            clearTimeout(timeoutId);
                             if (response.ok) {
                                 console.log('反馈发送成功');
                             } else {
-                                console.error('反馈发送失败');
+                                console.error('反馈发送失败 - HTTP状态:', response.status);
+                                // 静默失败，不影响用户体验
                             }
                         }).catch(error => {
-                            console.error('发送反馈时出错:', error);
+                            clearTimeout(timeoutId);
+                            if (error.name === 'AbortError') {
+                                console.error('反馈发送超时');
+                            } else {
+                                console.error('发送反馈时出错:', error);
+                            }
+                            // 静默失败，不影响用户体验
                         });
                     }
                     
@@ -921,12 +963,13 @@ public class HtmlTemplateOptimizer {
                 String emotionalIndex = message.getEmotionalIndex() != null ? 
                     message.getEmotionalIndex().toString() : "未设置";
                 String messageContent = escapeHtml(message.getMessage());
-                String escapedForJs = messageContent.replace("'", "\\'").replace("\n", "\\n");
+                // 改进JavaScript字符串转义，确保安全性
+                String escapedForJs = escapeForJavaScript(messageContent);
                 
                 messagesHtml.append("        <div class='message'>\n")
                           .append("            <div class='emotion-index'>情绪值: ").append(emotionalIndex).append("</div>\n")
                           .append("            <div class='message-content'>").append(messageContent).append("</div>\n")
-                          .append("            <button class='copy-btn' onclick=\"copyToClipboard('").append(escapedForJs).append("', this, ").append(emotionalIndex).append(")\">复制</button>\n")
+                          .append("            <button class='copy-btn' type='button' data-content='").append(escapedForJs).append("' data-emotion='").append(emotionalIndex).append("' onclick='copyFromButton(this)'>复制</button>\n")
                           .append("        </div>\n");
             }
         } else {
@@ -938,10 +981,17 @@ public class HtmlTemplateOptimizer {
         }
 
         // 使用安全的占位符替换，避免与CSS百分比冲突
-        return HTML_TEMPLATE.replace("{{BACKGROUND_INFO}}", backgroundInfoHtml)
+        String html = HTML_TEMPLATE.replace("{{BACKGROUND_INFO}}", backgroundInfoHtml)
                            .replace("{{MESSAGES_CONTENT}}", messagesHtml.toString())
-                           .replace("{{CHAT_ID}}", chatId != null ? chatId : "")
-                           .replace("{{BASE_URL}}", appConfig.getBaseUrl() != null ? appConfig.getBaseUrl() : "");
+                           .replace("{{CHAT_ID}}", chatId != null ? escapeForJavaScript(chatId) : "")
+                           .replace("{{BASE_URL}}", appConfig.getBaseUrl() != null ? escapeHtml(appConfig.getBaseUrl()) : "");
+        
+        // 验证生成的HTML完整性
+        if (!validateHtmlIntegrity(html)) {
+            log.warn("生成的HTML可能存在结构问题 - chatId: {}", chatId);
+        }
+        
+        return html;
     }
 
     /**
@@ -1101,6 +1151,28 @@ public class HtmlTemplateOptimizer {
                 .replace("\"", "&quot;")
                 .replace("'", "&#39;");
     }
+    
+    /**
+     * JavaScript字符串转义 - 更安全的处理方式
+     * 避免在JavaScript代码中出现语法错误
+     */
+    private String escapeForJavaScript(String text) {
+        if (text == null || text.isEmpty()) {
+            return "";
+        }
+        
+        return text.replace("\\", "\\\\")
+                .replace("'", "\\'")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                .replace("\b", "\\b")
+                .replace("\f", "\\f")
+                .replace("/", "\\/")
+                .replace("<", "\\u003c")
+                .replace(">", "\\u003e");
+    }
 
     /**
      * 快速检查是否包含HTML特殊字符
@@ -1115,6 +1187,25 @@ public class HtmlTemplateOptimizer {
         return false;
     }
 
+    /**
+     * 验证HTML结构完整性
+     */
+    private boolean validateHtmlIntegrity(String html) {
+        if (html == null || html.isEmpty()) {
+            return false;
+        }
+        
+        // 基本结构检查
+        return html.contains("<!DOCTYPE html>") &&
+               html.contains("<html") &&
+               html.contains("</html>") &&
+               html.contains("<head>") &&
+               html.contains("</head>") &&
+               html.contains("<body>") &&
+               html.contains("</body>") &&
+               html.contains("copyFromButton"); // 确保包含必要的JavaScript函数
+    }
+    
     /**
      * 获取模板缓存统计信息（用于监控）
      */

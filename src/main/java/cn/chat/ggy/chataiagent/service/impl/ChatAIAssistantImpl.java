@@ -83,7 +83,7 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
                 log.info("图片保存成功，路径: {}", imagePath);
                 
                 // 进行图片分析
-                UserInfoList userInfoList = imageAnalysisAPP.ocrImage("请分析这张图片的内容", file,chatId);
+                UserInfoList userInfoList = imageAnalysisAPP.ocrImage("请分析这张聊天界面截图中的内容", file,chatId);
                 imageAnalysisResult = JSONUtil.toJsonStr(userInfoList);
                 log.info("图片分析完成：{}", imageAnalysisResult);
                 
@@ -139,8 +139,19 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
         long startTime = System.currentTimeMillis();
         
         try {
-            // 使用优化后的HTML模板生成器
+            // 输入验证
+            if (chatId == null || chatId.trim().isEmpty()) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "chatId不能为空");
+            }
+            
+            // 使用优化后的HTML模板生成器，增加内容验证
             String htmlCode = htmlTemplateOptimizer.generateOptimizedHtml(resultInfo, chatId);
+            
+            // 验证生成的HTML代码完整性
+            if (htmlCode == null || htmlCode.length() < 1000) { // HTML模板至少应该有1000字符
+                log.warn("生成的HTML代码可能不完整 - chatId: {}, 长度: {}", chatId, 
+                        htmlCode != null ? htmlCode.length() : 0);
+            }
             
             // 构建结果对象并保存
             HtmlCodeResult build = HtmlCodeResult.builder().htmlCode(htmlCode).build();
@@ -152,11 +163,14 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
             
             return String.format("%s/%s", AppConstant.CODE_DEPLOY_HOST, chatId);
             
+        } catch (BusinessException e) {
+            // 业务异常直接抛出
+            throw e;
         } catch (Exception e) {
             long endTime = System.currentTimeMillis();
             log.error("HTML生成失败 - 耗时: {} ms, chatId: {}, 错误: {}", 
                     endTime - startTime, chatId, e.getMessage(), e);
-            throw new RuntimeException("HTML生成失败: " + e.getMessage(), e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "HTML生成失败: " + e.getMessage());
         }
     }
 }

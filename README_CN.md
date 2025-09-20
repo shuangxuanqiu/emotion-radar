@@ -134,19 +134,21 @@
 ---
 
 **步骤2：选择聊天背景场景**
-<img src="https://imgsea.com/images/2025/09/17/019b337ebcb000f4734649f1cd5d6812.md.jpg" width="300" alt="选择聊天背景"/>
+<img src="https://imgsea.com/images/2025/09/20/124b79a5fc35c4585a8b8e9161700acf.jpg" width="300" alt="选择聊天背景"/>
 *🎭 选择对话场景：朋友聊天、职场沟通、恋爱对话等*
 
 ---
 
 **步骤3：设置情感指数**
-<img src="https://imgsea.com/images/2025/09/17/4fe16d260d045a4a346c08dd2936adde.md.jpg" width="300" alt="选择情感分数"/>
+<img src="https://imgsea.com/images/2025/09/20/b4b434b96ee89e33a6637ce394c21f39.jpg" width="300" alt="选择情感分数"/>
 *📊 调节情感强度：1-10分，匹配你想要的回复风格*
 
 ---
 
 **步骤4：获取AI回复建议**
-<img src="https://imgsea.com/images/2025/09/17/ba1c9d3abffbfc35342d8937e81a7dec.md.jpg" width="300" alt="AI分析结果"/>
+<img src="https://imgsea.com/images/2025/09/20/654d8f42b3c98e35e344ac146d102dfb.jpg" width="300" alt="AI分析结果1"/>
+<img src="https://imgsea.com/images/2025/09/20/e55c2a33974b3de2213004d3a5528fb8.jpg" width="300" alt="AI分析结果2"/>
+<img src="https://imgsea.com/images/2025/09/20/40b5658945ff22865deccf19bb89be47.jpg" width="300" alt="AI分析结果3"/>
 *🤖 AI生成多个回复选项，告别尬聊困扰！*
 
 **🎉 从尬聊到神回复，只需28秒（(目前没想到什么好的优化方案)）四步走！**
