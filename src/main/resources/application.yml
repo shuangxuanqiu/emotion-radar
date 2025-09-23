@@ -24,11 +24,13 @@ spring:
     # MCP 服务配置（可选，需要启动 MCP 服务）
     mcp:
       client:
-        sse:
-          connections:
-            server1:
-              url: https://mcp.amap.com
-              sse-endpoint: /sse?key=${GAODE_API_KEY}
+        stdio:
+          servers-configuration: classpath:mcp-servers.json
+        #        sse:
+#          connections:
+#            server1:
+#              url: https://mcp.amap.com
+#              sse-endpoint: /sse?key=${GAODE_API_KEY}
 #            server2:
 #              url: http://ddns.6010.top:12846
         #        stdio:

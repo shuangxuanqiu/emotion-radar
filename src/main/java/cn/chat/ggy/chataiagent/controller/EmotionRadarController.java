@@ -181,11 +181,11 @@ public class EmotionRadarController {
         }
     }
 
-    @GetMapping(value = "/travel_guide/chat/sse/emitter")
+    @PostMapping(value = "/travel_guide/chat/sse/emitter")
     @Operation(summary = "SSE流式对话", description = "建立SSE连接，实现AI流式对话功能")
     public SseEmitter doChatWithLoveAppSseEmitter(
-            @Parameter(description = "用户消息内容", required = true, example = "你好") String message, 
-            @Parameter(description = "聊天会话ID", required = true, example = "abc123") String chatId) {
+            @Parameter(description = "用户消息内容", required = true, example = "你好") @RequestParam String message,
+            @Parameter(description = "聊天会话ID", required = true, example = "abc123") @RequestParam String chatId) {
         //创建一个超时时间较长的 SseEmitter
         SseEmitter emitter = new SseEmitter(180000L);//3分钟超时
 
@@ -198,6 +198,7 @@ public class EmotionRadarController {
                         //处理每条信息
                         chunk -> {
                             try {
+                                log.debug("发送SSE数据 - chatId: {}, 数据长度: {}", chatId, chunk.length());
                                 emitter.send(chunk);
                                 log.debug("发送SSE数据 - chatId: {}, 数据长度: {}", chatId, chunk.length());
                             } catch (Exception e) {
@@ -225,6 +226,52 @@ public class EmotionRadarController {
         log.info("开始AI流式调用 - chatId: {}, 消息长度: {}", chatId, message.length());
 
         return emitter;
+    }
+
+    @PostMapping(value = "/travel_guide/chat/complete")
+    @Operation(summary = "完整对话响应", description = "为HarmonyOS等不支持SSE的客户端提供完整的AI对话响应")
+    public ResponseEntity<String> doChatWithCompleteResponse(
+            @Parameter(description = "用户消息内容", required = true, example = "你好") @RequestParam String message,
+            @Parameter(description = "聊天会话ID", required = true, example = "abc123") @RequestParam String chatId) {
+        
+        try {
+            log.info("开始完整对话请求 - chatId: {}, 消息长度: {}", chatId, message.length());
+            
+            // 使用StringBuilder收集所有流式数据
+            StringBuilder completeResponse = new StringBuilder();
+            
+            // 获取流式数据并收集完整内容
+            deepSeekAPP.doChatByStream(message, chatId)
+                    .doOnNext(chunk -> {
+                        completeResponse.append(chunk);
+                        log.debug("收集数据块 - chatId: {}, 当前总长度: {}", chatId, completeResponse.length());
+                    })
+                    .doOnError(error -> {
+                        log.error("流式处理错误 - chatId: {}, 错误: {}", chatId, error.getMessage());
+                    })
+                    .doOnComplete(() -> {
+                        log.info("流式数据收集完成 - chatId: {}, 最终长度: {}", chatId, completeResponse.length());
+                    })
+                    .blockLast(); // 等待所有数据收集完成
+            
+            String finalResponse = completeResponse.toString();
+            
+            if (finalResponse.isEmpty()) {
+                log.warn("AI响应为空 - chatId: {}", chatId);
+                return ResponseEntity.ok("AI暂时无法生成回答，请稍后重试。");
+            }
+            
+            log.info("完整对话响应完成 - chatId: {}, 响应长度: {}", chatId, finalResponse.length());
+            
+            return ResponseEntity.ok()
+                    .header("Content-Type", "text/plain; charset=utf-8")
+                    .body(finalResponse);
+                    
+        } catch (Exception e) {
+            log.error("完整对话请求失败 - chatId: {}, 错误: {}", chatId, e.getMessage(), e);
+            return ResponseEntity.status(500)
+                    .body("处理请求时发生错误: " + e.getMessage());
+        }
     }
 
     @GetMapping(value = "/chat/memory/redis")
