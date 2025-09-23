@@ -101,10 +101,10 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
             
             // 添加情绪值信息
             if (emotionalIndex != null && emotionalIndex >= 1 && emotionalIndex <= 10) {
-                chatMessage += " \n 用户要求的情绪值：" + emotionalIndex+" 分 \n";
+                chatMessage += " \n 我要求的情绪值：" + emotionalIndex+" 分 \n";
             }
             //添加聊天背景
-            chatMessage += " \n 用户要求的聊天背景："+conversationScene+" \n";
+            chatMessage += " \n 我要求的聊天背景："+conversationScene+" \n";
             
             // 第三步：进行AI聊天
             log.info("开始AI聊天处理，chatId: {}, 消息长度: {}", chatId, chatMessage.length());

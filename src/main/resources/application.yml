@@ -12,7 +12,7 @@ spring:
           model: qwen-plus
       chat-vl:
         options:
-          model: qwen-vl-max-2025-08-13
+          model: qwen-vl-plus
       # DeepSeek 模型配置
       deepseek:
         options:
@@ -24,17 +24,8 @@ spring:
     # MCP 服务配置（可选，需要启动 MCP 服务）
     mcp:
       client:
-        sse:
-          connections:
-            server1:
-              url: https://mcp.amap.com
-              sse-endpoint: /sse?key=${GAODE_API_KEY}
-#            server2:
-#              url: http://ddns.6010.top:12846
-        #        stdio:
-#          servers-configuration: classpath:mcp-servers.json
-
-
+        stdio:
+          servers-configuration: classpath:mcp-servers.json
     # 向量数据库配置（可选，需要启动 PgVector 数据库）
 #    vectorstore:
 #      pgvector:
