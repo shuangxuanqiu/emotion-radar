@@ -1,5 +1,6 @@
 package cn.chat.ggy.chataiagent.controller;
 
+import cn.chat.ggy.chataiagent.app.DeepSeekAPP;
 import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 
 import cn.chat.ggy.chataiagent.model.VO.FeedbackMessageVO;
@@ -44,6 +45,8 @@ public class EmotionRadarController {
     private FeedbackMessageService feedbackMessageService;
     @Resource
     private ChatBasicsApp chatBasicsApp;
+    @Resource
+    private DeepSeekAPP deepSeekAPP;
     @Resource
     private CacheService cacheService;
     @Resource
@@ -190,7 +193,7 @@ public class EmotionRadarController {
         chatSessionManagementService.registerSseEmitter(chatId, emitter);
 
         //获取 Flux 数据流并直接订阅，保存订阅引用以便停止
-        Disposable subscription = chatBasicsApp.doChatByStream(message, chatId)
+        Disposable subscription = deepSeekAPP.doChatByStream(message, chatId)
                 .subscribe(
                         //处理每条信息
                         chunk -> {

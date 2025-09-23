@@ -19,8 +19,10 @@ import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -47,10 +49,10 @@ public class DeepSeekAPP {
                 .chatMemoryRepository(new RedisChatMemory(redisTemplate))
                 .maxMessages(1)
                 .build();
-        // 使用现有的chat-criterion提示词
-        String SYSTEM_PROMPT = promptConfig.promptChatCriterion();
+        // 使用现有的提示词
+        String SYSTEM_PROMPT = promptConfig.promptChatBsicsn();
         chatClient = ChatClient.builder(dashscopeChatModel)
-//                .defaultSystem(SYSTEM_PROMPT)
+                .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
                         //上下文回答的保存机制
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
@@ -96,5 +98,25 @@ public class DeepSeekAPP {
         return content;
     }
 
+
+    /**
+     * 基础对话
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public Flux<String> doChatByStream(String message, String chatId) {
+        return chatClient.prompt()
+                .user(message)
+                .toolContext(Map.of(
+                        "chatId", chatId
+                ))//将房间 id 放入上下文
+                .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, chatId))
+                //开启自定义日志
+                .advisors(new MyLoggerAdvisor())
+                .toolCallbacks(toolCallbackProvider)
+                .stream()
+                .content();
+    }
 
 }
