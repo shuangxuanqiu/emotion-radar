@@ -12,7 +12,7 @@ spring:
           model: qwen-plus
       chat-vl:
         options:
-          model: qwen-vl-max
+          model: qwen-vl-max-2025-08-13
       # DeepSeek 模型配置
       deepseek:
         options:
@@ -24,20 +24,37 @@ spring:
     # MCP 服务配置（可选，需要启动 MCP 服务）
     mcp:
       client:
-        stdio:
-          servers-configuration: classpath:mcp-servers.json
+        sse:
+          connections:
+            server1:
+              url: https://mcp.amap.com
+              sse-endpoint: /sse?key=${GAODE_API_KEY}
+#            server2:
+#              url: http://ddns.6010.top:12846
+        #        stdio:
+#          servers-configuration: classpath:mcp-servers.json
+
+
     # 向量数据库配置（可选，需要启动 PgVector 数据库）
-    vectorstore:
-      pgvector:
-        index-type: HNSW
-        dimensions: 1536
-        distance-type: COSINE_DISTANCE
-        max-document-batch-size: 10000
+#    vectorstore:
+#      pgvector:
+#        index-type: HNSW
+#        dimensions: 1536
+#        distance-type: COSINE_DISTANCE
+#        max-document-batch-size: 10000
   data:
     redis:
       host: 127.0.0.1
       port: 6379
   # 如需密码请在 application-local.yml 中配置
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+      file-size-threshold: 0
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -50,6 +67,8 @@ spring:
       minimum-idle: 5
       idle-timeout: 300000
       connection-timeout: 20000
+# 高德的 apikey
+GAODE_API_KEY: your-dashscope-api-key-here
 # MyBatis-Flex 配置
 mybatis-flex:
   mapper-locations: classpath*:/mapper/*.xml
@@ -66,6 +85,10 @@ server:
   port: 8123
   servlet:
     context-path: /api
+  # Tomcat 文件上传配置
+  tomcat:
+    max-swallow-size: -1
+    max-http-form-post-size: 5MB
 
 # 应用配置
 app:

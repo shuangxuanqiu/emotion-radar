@@ -45,12 +45,12 @@ public class DeepSeekAPP {
                        PromptConfig promptConfig) throws IOException {
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(new RedisChatMemory(redisTemplate))
-                .maxMessages(2)
+                .maxMessages(1)
                 .build();
         // 使用现有的chat-criterion提示词
         String SYSTEM_PROMPT = promptConfig.promptChatCriterion();
         chatClient = ChatClient.builder(dashscopeChatModel)
-                .defaultSystem(SYSTEM_PROMPT)
+//                .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
                         //上下文回答的保存机制
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
@@ -71,6 +71,7 @@ public class DeepSeekAPP {
         Prompt prompt = new Prompt(message, 
                 DashScopeChatOptions.builder()
                         .withModel(deepSeekModel)  // 使用配置的deepseek的模型
+                        .withEnableThinking(false)
                         .build());
 
         return chatClient.prompt(prompt)
@@ -79,6 +80,20 @@ public class DeepSeekAPP {
 //                .toolCallbacks(toolCallbackProvider)
                 .call()
                 .entity(ResultInfo.class);
+    }
+
+    public String doChat(String message){
+        // 明确指定使用DeepSeek模型
+        Prompt prompt = new Prompt(message,
+                DashScopeChatOptions.builder()
+                        .withModel(deepSeekModel)  // 使用配置的deepseek的模型
+                        .withEnableThinking(false)
+                        .build());
+
+        String content = chatClient.prompt(prompt)
+                .toolCallbacks(toolCallbackProvider)
+                .call().content();
+        return content;
     }
 
 
