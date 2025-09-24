@@ -17,16 +17,11 @@ public class AiModelMonitorListener {
     @Resource
     private ConsumeStatisticService consumeStatisticService;
     @Async("databaseAsyncExecutor")
-    public void onResponse(ChatClientResponse chatClientResponse) {
+    public void onResponse(ChatClientResponse chatClientResponse,String chatId ,String traceId,String aiServiceType) {
         try {
-            // 获取完整的上下文信息
-            String chatId = MonitorContextHolder.getContext("chatId");
-            String traceId = MonitorContextHolder.getContext("traceId");
-            String requestUri = MonitorContextHolder.getContext("requestUri");
-            String aiServiceType = MonitorContextHolder.getContext("aiServiceType");
             
-            log.info("记录token消耗 - traceId: {}, chatId: {}, uri: {}, AI服务类型: {}", 
-                    traceId, chatId, requestUri, aiServiceType);
+            log.info("记录token消耗 - traceId: {}, chatId: {} , AI服务类型: {}",
+                    traceId, chatId , aiServiceType);
             
             // 拿到 token 信息
             Usage usage = chatClientResponse.chatResponse().getMetadata().getUsage();
@@ -46,7 +41,6 @@ public class AiModelMonitorListener {
                 log.warn("Token消耗记录跳过 - usage或chatId为空: usage={}, chatId={}, traceId={}",usage, chatId, traceId);
             }
         } catch (Exception e) {
-            String traceId = MonitorContextHolder.getContext("traceId");
             log.error("记录token消耗失败 - traceId: {}", traceId, e);
         }
     }

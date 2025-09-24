@@ -1,8 +1,10 @@
 package cn.chat.ggy.chataiagent.app;
 
 import cn.chat.ggy.chataiagent.advisor.MyLoggerAdvisor;
+import cn.chat.ggy.chataiagent.advisor.TextChatObservabilityAdvisor;
 import cn.chat.ggy.chataiagent.chatmemory.RedisChatMemory;
 import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
+import cn.chat.ggy.chataiagent.monitor.MonitorContextHolder;
 import cn.chat.ggy.chataiagent.config.PromptConfig;
 import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import jakarta.annotation.Resource;
@@ -38,10 +40,12 @@ public class DeepSeekAPP {
      * DeepSeek聊天客户端
      * @param dashscopeChatModel AI聊天模型
      * @param promptConfig 提示词配置
+     * @param textChatObservabilityAdvisor 文字聊天可观测性顾问
      */
     public DeepSeekAPP(ChatModel dashscopeChatModel,
                        RedisTemplate<String,Object> redisTemplate,
                        MyLoggerAdvisor myLoggerAdvisor,
+                       TextChatObservabilityAdvisor textChatObservabilityAdvisor,
                        PromptConfig promptConfig) throws IOException {
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryRepository(new RedisChatMemory(redisTemplate))
@@ -54,7 +58,9 @@ public class DeepSeekAPP {
                 .defaultAdvisors(
                         //上下文回答的保存机制
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
-                        myLoggerAdvisor)
+                        myLoggerAdvisor,
+                        //文字聊天AI可观测性 advisor
+                        textChatObservabilityAdvisor)
                 .build();
     }
     
@@ -66,6 +72,10 @@ public class DeepSeekAPP {
      */
     public ResultInfo doChat(String message, String chatId) {
         log.info("DeepSeek模型处理聊天 - chatId: {}, model: {}", chatId, deepSeekModel);
+
+        // 设置监控上下文
+        MonitorContextHolder.setContext("chatId", chatId);
+        MonitorContextHolder.setContext("requestUri", "/api/chat/deepseek");
 
         // 明确指定使用DeepSeek模型
         Prompt prompt = new Prompt(message, 

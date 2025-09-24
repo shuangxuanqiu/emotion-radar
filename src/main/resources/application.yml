@@ -17,15 +17,16 @@ spring:
       deepseek:
         options:
           model: deepseek-v3
-    ollama:
-      base-url: http://localhost:11434
-      chat:
-        model: gemma3:1b
+#    ollama:
+#      base-url: http://localhost:11434
+#      chat:
+#        model: gemma3:1b
     # MCP 服务配置（可选，需要启动 MCP 服务）
     mcp:
       client:
         stdio:
           servers-configuration: classpath:mcp-servers.json
+
     # 向量数据库配置（可选，需要启动 PgVector 数据库）
 #    vectorstore:
 #      pgvector:

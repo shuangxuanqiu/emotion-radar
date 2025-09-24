@@ -84,6 +84,12 @@ public class ConsumeStatistic implements Serializable {
     private LocalDateTime updateTime;
 
     /**
+     * AI服务类型 (IMAGE_ANALYSIS: 图像解析, TEXT_CHAT: 文字聊天)
+     */
+    @Column("aiServiceType")
+    private String aiServiceType;
+
+    /**
      * 是否删除
      */
     @Column(value = "isDelete", isLogicDelete = true)

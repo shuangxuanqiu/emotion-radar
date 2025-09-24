@@ -67,9 +67,9 @@ public class ChatBotApp {
                         //上下文回答的保存机制
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),
                         //自定义 advisor (通过构造函数注入)
-                        myLoggerAdvisor
-//                        //文字聊天AI可观测性 advisor
-//                        textChatObservabilityAdvisor
+                        myLoggerAdvisor,
+                        //文字聊天AI可观测性 advisor
+                        textChatObservabilityAdvisor
                 )
                 .build();
     }

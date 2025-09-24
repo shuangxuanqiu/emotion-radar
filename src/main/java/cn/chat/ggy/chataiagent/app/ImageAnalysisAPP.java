@@ -119,8 +119,8 @@ public class ImageAnalysisAPP {
            long analysisStart = System.currentTimeMillis();
            
            // 设置监控上下文
-//           MonitorContextHolder.setContext("chatId", chatId);
-//           MonitorContextHolder.setContext("requestUri", "/api/image/analysis");
+           MonitorContextHolder.setContext("chatId", chatId);
+           MonitorContextHolder.setContext("requestUri", "/api/image/analysis");
            
            UserInfoList entity = chatClient.prompt(chatPrompt)
                    .toolContext(Map.of("chatId", chatId))

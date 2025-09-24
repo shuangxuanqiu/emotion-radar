@@ -41,6 +41,7 @@ public class ConsumeStatisticServiceImpl extends ServiceImpl<ConsumeStatisticMap
                     .completionTokens(Long.valueOf(usage.getCompletionTokens()))
                     .promptTokens(Long.valueOf(usage.getPromptTokens()))
                     .totalTokens(Long.valueOf(usage.getTotalTokens()))
+                    .aiServiceType(aiServiceType)  // 添加AI服务类型字段
                     .createTime(LocalDateTime.now())
                     .updateTime(LocalDateTime.now())
                     .build();

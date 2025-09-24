@@ -35,14 +35,14 @@
         <a-row :gutter="[16, 16]" class="stats-overview" style="margin-bottom: 24px">
             <a-col :xs="12" :sm="12" :md="6" :lg="6">
                 <a-card class="stats-card" :loading="loading">
-                    <a-statistic title="总Token消费" :value="stats.totalTokens" :value-style="{ color: '#3f8600', fontWeight: '600' }"
-                        prefix="🔥" />
+                    <a-statistic title="总Token消费" :value="stats.totalTokens"
+                        :value-style="{ color: '#3f8600', fontWeight: '600' }" prefix="🔥" />
                 </a-card>
             </a-col>
             <a-col :xs="12" :sm="12" :md="6" :lg="6">
                 <a-card class="stats-card" :loading="loading">
-                    <a-statistic title="提示Token" :value="stats.totalPromptTokens" :value-style="{ color: '#1890ff', fontWeight: '600' }"
-                        prefix="💬" />
+                    <a-statistic title="提示Token" :value="stats.totalPromptTokens"
+                        :value-style="{ color: '#1890ff', fontWeight: '600' }" prefix="💬" />
                 </a-card>
             </a-col>
             <a-col :xs="12" :sm="12" :md="6" :lg="6">
@@ -53,8 +53,8 @@
             </a-col>
             <a-col :xs="12" :sm="12" :md="6" :lg="6">
                 <a-card class="stats-card" :loading="loading">
-                    <a-statistic title="记录总数" :value="stats.totalRecords" :value-style="{ color: '#cf1322', fontWeight: '600' }"
-                        prefix="📊" />
+                    <a-statistic title="记录总数" :value="stats.totalRecords"
+                        :value-style="{ color: '#cf1322', fontWeight: '600' }" prefix="📊" />
                 </a-card>
             </a-col>
         </a-row>
@@ -79,46 +79,38 @@
                     <LoadingSpinner text="正在加载Token统计..." type="bounce" theme="gradient" />
                 </template>
                 <div class="table-container">
-                    <a-table 
-                        :dataSource="dataSource" 
-                        :columns="columns" 
-                        :loading="false" 
-                        :pagination="pagination"
-                        @change="handleTableChange" 
-                        row-key="id"
-                        :scroll="{ x: 1000 }"
-                        size="middle"
-                        :show-sorter-tooltip="false"
-                    >
-                <template #bodyCell="{ column, record }">
-                    <template v-if="column.key === 'action'">
-                        <a-space>
-                            <a-button type="link" size="small" @click="viewRecord(record)">查看</a-button>
-                            <a-button type="link" size="small" @click="editRecord(record)">编辑</a-button>
-                            <a-popconfirm title="确定要删除这条记录吗？" @confirm="deleteRecord(record.id)" ok-text="确定"
-                                cancel-text="取消">
-                                <a-button type="link" size="small" danger>删除</a-button>
-                            </a-popconfirm>
-                        </a-space>
-                    </template>
-                    <template v-else-if="column.key === 'totalTokens'">
-                        <a-tag color="green">{{ record.totalTokens }}</a-tag>
-                    </template>
-                    <template v-else-if="column.key === 'promptTokens'">
-                        <a-tag color="blue">{{ record.promptTokens }}</a-tag>
-                    </template>
-                    <template v-else-if="column.key === 'completionTokens'">
-                        <a-tag color="purple">{{ record.completionTokens }}</a-tag>
-                    </template>
-                    <template v-else-if="column.key === 'isDelete'">
-                        <a-tag :color="record.isDelete === 0 ? 'green' : 'red'">
-                            {{ record.isDelete === 0 ? '正常' : '已删除' }}
-                        </a-tag>
-                    </template>
-                    <template v-else-if="column.key === 'createTime'">
-                        <span>{{ formatTime(record.createTime) }}</span>
-                    </template>
-                </template>
+                    <a-table :dataSource="dataSource" :columns="columns" :loading="false" :pagination="pagination"
+                        @change="handleTableChange" row-key="id" :scroll="{ x: 1000 }" size="middle"
+                        :show-sorter-tooltip="false">
+                        <template #bodyCell="{ column, record }">
+                            <template v-if="column.key === 'action'">
+                                <a-space>
+                                    <a-button type="link" size="small" @click="viewRecord(record)">查看</a-button>
+                                    <a-button type="link" size="small" @click="editRecord(record)">编辑</a-button>
+                                    <a-popconfirm title="确定要删除这条记录吗？" @confirm="deleteRecord(record.id)" ok-text="确定"
+                                        cancel-text="取消">
+                                        <a-button type="link" size="small" danger>删除</a-button>
+                                    </a-popconfirm>
+                                </a-space>
+                            </template>
+                            <template v-else-if="column.key === 'totalTokens'">
+                                <a-tag color="green">{{ record.totalTokens }}</a-tag>
+                            </template>
+                            <template v-else-if="column.key === 'promptTokens'">
+                                <a-tag color="blue">{{ record.promptTokens }}</a-tag>
+                            </template>
+                            <template v-else-if="column.key === 'completionTokens'">
+                                <a-tag color="purple">{{ record.completionTokens }}</a-tag>
+                            </template>
+                            <template v-else-if="column.key === 'isDelete'">
+                                <a-tag :color="record.isDelete === 0 ? 'green' : 'red'">
+                                    {{ record.isDelete === 0 ? '正常' : '已删除' }}
+                                </a-tag>
+                            </template>
+                            <template v-else-if="column.key === 'createTime'">
+                                <span>{{ formatTime(record.createTime) }}</span>
+                            </template>
+                        </template>
                     </a-table>
                 </div>
             </a-spin>
@@ -128,15 +120,20 @@
         <a-modal v-model:open="modalVisible" :title="modalTitle" :width="700" @ok="handleSubmit" @cancel="handleCancel"
             :confirm-loading="submitLoading">
             <a-form ref="formRef" :model="formData" :rules="formRules" layout="vertical">
-                <a-row :gutter="16">
-                    <a-col :span="12">
+                <a-row :gutter="24">
+                    <a-col :span="8">
                         <a-form-item label="用户ID" name="userId">
                             <a-input-number v-model:value="formData.userId" placeholder="请输入用户ID" style="width: 100%" />
                         </a-form-item>
                     </a-col>
-                    <a-col :span="12">
+                    <a-col :span="8">
                         <a-form-item label="聊天ID" name="chatId">
                             <a-input v-model:value="formData.chatId" placeholder="请输入聊天ID" />
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="8">
+                        <a-form-item label="AI服务类型" name="aiServiceType">
+                            <a-input v-model:value="formData.aiServiceType" placeholder="请输入AI服务类型" />
                         </a-form-item>
                     </a-col>
                 </a-row>
@@ -174,6 +171,7 @@
             <a-descriptions :column="2" bordered>
                 <a-descriptions-item label="ID">{{ viewData.id }}</a-descriptions-item>
                 <a-descriptions-item label="用户ID">{{ viewData.userId }}</a-descriptions-item>
+                <a-descriptions-item label="AI服务类型">{{ viewData.aiServiceType }}</a-descriptions-item>
                 <a-descriptions-item label="聊天ID">{{ viewData.chatId }}</a-descriptions-item>
                 <a-descriptions-item label="总Token数">
                     <a-tag color="green">{{ viewData.totalTokens }}</a-tag>
@@ -236,6 +234,7 @@ const formData = reactive<API.ConsumeStatistic>({
     userId: undefined,
     chatId: '',
     totalTokens: undefined,
+    aiServiceType: undefined,
     promptTokens: undefined,
     completionTokens: undefined,
     isDelete: 0
@@ -276,6 +275,12 @@ const columns: TableColumnsType = [
         title: '用户ID',
         dataIndex: 'userId',
         key: 'userId',
+        width: 100
+    },
+    {
+        title: 'AI服务类型',
+        dataIndex: 'aiServiceType',
+        key: 'aiServiceType',
         width: 100
     },
     {
@@ -592,8 +597,8 @@ onMounted(() => {
         border-radius: 8px;
         overflow: hidden;
     }
-    
-    .ant-table-thead > tr > th {
+
+    .ant-table-thead>tr>th {
         background: linear-gradient(135deg, #fafafa, #f0f0f0);
         font-weight: 600;
         padding: 16px 12px;
@@ -601,27 +606,27 @@ onMounted(() => {
         color: #1a1a1a;
         font-size: 14px;
     }
-    
-    .ant-table-tbody > tr {
+
+    .ant-table-tbody>tr {
         transition: all 0.2s ease;
     }
-    
-    .ant-table-tbody > tr:hover {
+
+    .ant-table-tbody>tr:hover {
         background: #f8f9fa;
         transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
-    
-    .ant-table-tbody > tr > td {
+
+    .ant-table-tbody>tr>td {
         padding: 14px 12px;
         border-bottom: 1px solid #f0f0f0;
         vertical-align: middle;
     }
-    
+
     .ant-table-scroll {
         overflow-x: auto;
     }
-    
+
     .ant-pagination {
         margin: 24px 0 8px;
         text-align: center;
@@ -708,7 +713,7 @@ onMounted(() => {
         color: #1a1a1a;
         background: #fafafa;
     }
-    
+
     .ant-descriptions-item-content {
         color: #4a4a4a;
     }
@@ -734,43 +739,46 @@ onMounted(() => {
         gap: 16px;
         padding: 16px 0;
     }
-    
+
     .page-header h2 {
         font-size: 24px;
     }
-    
-    .search-card, .table-card {
+
+    .search-card,
+    .table-card {
         border-radius: 8px;
         margin: 0 -4px 16px;
     }
-    
-    .stats-card:hover, .search-card:hover {
+
+    .stats-card:hover,
+    .search-card:hover {
         transform: none;
     }
-    
+
     .table-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     :deep(.ant-table-wrapper) {
-        .ant-table-thead > tr > th,
-        .ant-table-tbody > tr > td {
+
+        .ant-table-thead>tr>th,
+        .ant-table-tbody>tr>td {
             padding: 8px 6px;
             font-size: 12px;
         }
-        
-        .ant-table-tbody > tr:hover {
+
+        .ant-table-tbody>tr:hover {
             transform: none;
         }
     }
-    
+
     :deep(.ant-modal) {
         margin: 16px;
         max-width: calc(100vw - 32px);
     }
-    
+
     :deep(.ant-statistic-content) {
         font-size: 20px;
     }
@@ -780,15 +788,15 @@ onMounted(() => {
     .page-header h2 {
         font-size: 20px;
     }
-    
+
     :deep(.ant-form-item) {
         margin-bottom: 16px;
     }
-    
+
     :deep(.ant-space-item) {
         margin-bottom: 8px;
     }
-    
+
     :deep(.ant-statistic-content) {
         font-size: 18px;
     }

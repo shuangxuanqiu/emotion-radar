@@ -55,6 +55,7 @@ declare namespace API {
     id?: number
     chatId?: string
     totalTokens?: number
+    aiServiceType?: number
     promptTokens?: number
     completionTokens?: number
     userId?: number
