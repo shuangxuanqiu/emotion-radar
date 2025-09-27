@@ -114,6 +114,16 @@ knife4j:
 logging:
   level:
     org.springframework.ai: INFO
+    # MCP 客户端日志 (Spring AI 1.1.0-M2)
+    org.springframework.ai.mcp: DEBUG
+    org.springframework.ai.mcp.client: DEBUG
+    org.springframework.ai.mcp.sse: DEBUG
+    # HTTP 客户端日志（用于调试SSE连接）
+    org.springframework.web.reactive.function.client: DEBUG
+    reactor.netty.http.client: DEBUG
+    # Spring AI 1.1.0-M2 新增功能日志
+    org.springframework.ai.tool: DEBUG
+    org.springframework.ai.function: DEBUG
     root: INFO
     # MyBatis SQL 日志
     com.mybatisflex.core.audit.ConsoleMessageCollector: DEBUG
@@ -124,3 +134,6 @@ logging:
     cn.chat.ggy.chataiagent.mapper: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/ggy-ai-agent.log
