@@ -51,25 +51,7 @@ public class EmotionRadarController {
     @Resource
     private ChatContentService chatContentService;
 
-    /**
-     * 返回一个的内容是 json 格式
-     * @param file
-     * @param emotionalIndex
-     * @return
-     * @throws IOException
-     */
-    @PostMapping(value = "/is-json", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "图片情感分析(JSON格式)", description = "上传图片进行AI情感分析，返回JSON格式的分析结果")
-    public ResultInfo resuleJson(
-            @Parameter(description = "上传的图片文件", required = true) @RequestParam("file") MultipartFile file, 
-            @Parameter(description = "情感指数参数", required = true, example = "5") @RequestParam("emotionalIndex") Long emotionalIndex) throws IOException {
-        long startTime = System.currentTimeMillis();
-        String chatId = RandomUtil.randomString(6);
-        ResultInfo resultInfo = chatAIAssistant.chatHelpMe("请分析这张图片的内容", file, emotionalIndex,"", chatId);
-        long endTime = System.currentTimeMillis();
-        log.info("方法 resuleJson 执行耗时: {} ms, chatId: {}", endTime - startTime, chatId);
-        return resultInfo;
-    }
+
 
     /**
      * 存储来自用户的反馈信息
