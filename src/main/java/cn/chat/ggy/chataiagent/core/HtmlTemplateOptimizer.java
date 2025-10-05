@@ -412,10 +412,70 @@ public class HtmlTemplateOptimizer {
                     h1 { 
                         color: #333; 
                         text-align: center; 
-                        margin-bottom: 40px;
+                        margin-bottom: 20px;
                         font-size: 28px;
                         font-weight: 300;
                         text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
+                    .url-copy-banner {
+                        background: linear-gradient(145deg, #ff6b6b, #ee5a6f);
+                        padding: 15px 20px;
+                        border-radius: 12px;
+                        margin: 0 0 30px 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+                        animation: pulse 2s ease-in-out infinite;
+                    }
+                    @keyframes pulse {
+                        0%, 100% { box-shadow: 0 4px 15px rgba(255,107,107,0.3); }
+                        50% { box-shadow: 0 6px 20px rgba(255,107,107,0.5); }
+                    }
+                    .url-copy-text {
+                        color: white;
+                        font-size: 15px;
+                        font-weight: 500;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    .url-copy-icon {
+                        font-size: 24px;
+                        animation: bounce 1s ease-in-out infinite;
+                    }
+                    @keyframes bounce {
+                        0%, 100% { transform: translateY(0); }
+                        50% { transform: translateY(-5px); }
+                    }
+                    .copy-url-btn {
+                        background: white;
+                        color: #ff6b6b;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 15px;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        min-height: 48px;
+                        touch-action: manipulation;
+                        user-select: none;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    .copy-url-btn:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    }
+                    .copy-url-btn:active {
+                        transform: translateY(0);
+                    }
+                    .copy-url-btn.copied {
+                        background: linear-gradient(145deg, #28a745, #20c997);
+                        color: white;
                     }
                     .loading {
                         display: none;
@@ -438,7 +498,27 @@ public class HtmlTemplateOptimizer {
                         
                         h1 {
                             font-size: 22px;
-                            margin-bottom: 25px;
+                            margin-bottom: 15px;
+                        }
+                        
+                        .url-copy-banner {
+                            flex-direction: column;
+                            gap: 12px;
+                            padding: 12px 15px;
+                            margin-bottom: 20px;
+                        }
+                        
+                        .url-copy-text {
+                            font-size: 14px;
+                            text-align: center;
+                        }
+                        
+                        .copy-url-btn {
+                            width: 100%;
+                            justify-content: center;
+                            padding: 14px 20px;
+                            font-size: 15px;
+                            min-height: 50px;
                         }
                         
                         .message {
@@ -820,6 +900,71 @@ public class HtmlTemplateOptimizer {
                         }, 3000);
                     }
                     
+                    // 复制当前页面URL到剪贴板
+                    function copyCurrentUrl() {
+                        const currentUrl = window.location.href;
+                        const button = event.target;
+                        
+                        try {
+                            if (navigator.clipboard && window.isSecureContext) {
+                                // 现代浏览器的Clipboard API
+                                navigator.clipboard.writeText(currentUrl).then(() => {
+                                    showUrlCopySuccess(button);
+                                }).catch(err => {
+                                    console.error('复制URL失败:', err);
+                                    fallbackCopyUrl(currentUrl, button);
+                                });
+                            } else {
+                                // 降级方案
+                                fallbackCopyUrl(currentUrl, button);
+                            }
+                        } catch (error) {
+                            console.error('复制操作失败:', error);
+                            fallbackCopyUrl(currentUrl, button);
+                        }
+                    }
+                    
+                    // 降级方案：使用传统方法复制URL
+                    function fallbackCopyUrl(url, button) {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = url;
+                        textArea.style.position = 'fixed';
+                        textArea.style.left = '-999999px';
+                        textArea.style.top = '-999999px';
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        
+                        try {
+                            const successful = document.execCommand('copy');
+                            if (successful) {
+                                showUrlCopySuccess(button);
+                            } else {
+                                showToast('复制失败，请手动复制地址栏链接 (╯°□°）╯');
+                            }
+                        } catch (err) {
+                            console.error('复制失败:', err);
+                            showToast('复制失败，请手动复制地址栏链接 (╯°□°）╯');
+                        }
+                        
+                        document.body.removeChild(textArea);
+                    }
+                    
+                    // 显示URL复制成功状态
+                    function showUrlCopySuccess(button) {
+                        const originalText = button.innerHTML;
+                        button.innerHTML = '✅ 已复制链接！';
+                        button.classList.add('copied');
+                        
+                        showToast('网页链接已复制！可以分享给朋友啦 ♪(´▽｀)');
+                        
+                        // 2.5秒后恢复原状
+                        setTimeout(() => {
+                            button.innerHTML = originalText;
+                            button.classList.remove('copied');
+                        }, 2500);
+                    }
+                    
                     // 禁止页面缩放的额外防护
                     document.addEventListener('gesturestart', function (e) {
                         e.preventDefault();
@@ -879,6 +1024,18 @@ public class HtmlTemplateOptimizer {
             <body>
                 <div class='container'>
                     <h1>来自小扬 (＾▽＾)／ 的 AI聊天分析结果</h1>
+                    
+                    <!-- URL复制横幅 -->
+                    <div class='url-copy-banner'>
+                        <div class='url-copy-text'>
+                            <span class='url-copy-icon'>📌</span>
+                            <span>保存此页面链接，随时查看分析结果</span>
+                        </div>
+                        <button class='copy-url-btn' onclick='copyCurrentUrl()' type='button'>
+                            📋 复制网页链接
+                        </button>
+                    </div>
+                    
                     {{BACKGROUND_INFO}}
                     {{MESSAGES_CONTENT}}
                     <div class='feedback-container'>

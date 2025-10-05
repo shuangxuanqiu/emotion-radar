@@ -1,5 +1,6 @@
 package cn.chat.ggy.chataiagent.app;
 
+import cn.chat.ggy.chataiagent.app.chatScene.DefaultAllAPP;
 import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 import cn.chat.ggy.chataiagent.service.ChatAIAssistant;
 import cn.hutool.json.JSONUtil;
@@ -7,17 +8,16 @@ import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
-class DeepSeekAPPTest {
+class DefaultAllAPPTest {
     @Resource
-    private DeepSeekAPP deepSeekAPP;
+    private DefaultAllAPP defaultAllAPP;
     @Resource
     private ChatAIAssistant chatAIAssistant;
 
     @Test
     void doChatN(){
-      String s =   deepSeekAPP.doChat("现在有哪些洗衣机可用");
+      String s =   defaultAllAPP.doChat("现在有哪些洗衣机可用");
         System.out.println("返回的信息："+s);
     }
     @Test
@@ -81,7 +81,7 @@ class DeepSeekAPPTest {
                 }
                 
                 """;
-        ResultInfo resultInfo = deepSeekAPP.doChat(message, "133");
+        ResultInfo resultInfo = defaultAllAPP.doChat(message, "133");
         System.out.println(JSONUtil.toJsonStr(resultInfo));
         //制作 html 文件
         String resultUrl = chatAIAssistant.htmlStorage(resultInfo, "133");

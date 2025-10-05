@@ -110,6 +110,7 @@ public class ImageAnalysisAPP {
            Prompt chatPrompt = new Prompt(message,
                    DashScopeChatOptions.builder()
                            .withModel(imageAnalysisModel)
+                           .withEnableThinking(true)
                            .withMultiModel(true)
                            .withVlHighResolutionImages(false)  // 关闭高分辨率以提升速度
                            .withTemperature(0.6)               // 降低随机性以提升响应速度

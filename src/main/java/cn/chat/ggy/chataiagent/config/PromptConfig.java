@@ -16,7 +16,10 @@ import java.nio.charset.StandardCharsets;
 @Order(1)
 public class PromptConfig {
 
-
+    /**
+     * 情感雷达的核心提示词-全能知识库-文本内容解析
+     * @return
+     */
     @Bean(name="promptChatCriterion")
     public String promptChatCriterion() {
         try {
@@ -26,6 +29,11 @@ public class PromptConfig {
             throw new RuntimeException("Failed to load chat criterion prompt", e);
         }
     }
+
+    /**
+     * 基础聊天的bean
+     * @return
+     */
     @Bean(name="promptChatBsicsn")
     public String promptChatBsicsn() {
         try {
@@ -36,10 +44,28 @@ public class PromptConfig {
         }
     }
 
+    /**
+     * 图片识别的 bean
+     * @return
+     */
     @Bean(name="promptImageAnalysis")
     public String promptImageAnalysis() {
         try {
             ClassPathResource resource = new ClassPathResource("prompt/image-analysis.txt");
+            return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load image analysis prompt", e);
+        }
+    }
+
+    /**
+     * 智能体路由的 bean
+     * @return
+     */
+    @Bean(name="promptRouting")
+    public String promptRouting() {
+        try {
+            ClassPathResource resource = new ClassPathResource("prompt/chat-routing.txt");
             return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load image analysis prompt", e);

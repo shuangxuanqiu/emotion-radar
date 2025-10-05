@@ -12,11 +12,15 @@ spring:
           model: qwen-plus
       chat-vl:
         options:
-          model: qwen-vl-plus
+          model: qwen3-vl-plus-2025-09-23
       # DeepSeek 模型配置
       deepseek:
         options:
-          model: deepseek-v3
+          model: deepseek-v3.2-exp
+      routing-chat-model:
+        options:
+          model: qwen-turbo
+          max-tokens: 1000
 #    ollama:
 #      base-url: http://localhost:11434
 #      chat:
