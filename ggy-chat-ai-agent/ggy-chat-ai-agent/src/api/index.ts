@@ -6,11 +6,13 @@ import * as tupianjiexiguanli from './tupianjiexiguanli'
 import * as yonghufankuiguanli from './yonghufankuiguanli'
 import * as tokenxiaofeitongjiguanli from './tokenxiaofeitongjiguanli'
 import * as duihuaneirongguanli from './duihuaneirongguanli'
+import * as emotionRadarStreamController from './emotionRadarStreamController'
 import * as qingganleidahexinfuwu from './qingganleidahexinfuwu'
 export default {
   tupianjiexiguanli,
   yonghufankuiguanli,
   tokenxiaofeitongjiguanli,
   duihuaneirongguanli,
+  emotionRadarStreamController,
   qingganleidahexinfuwu,
 }

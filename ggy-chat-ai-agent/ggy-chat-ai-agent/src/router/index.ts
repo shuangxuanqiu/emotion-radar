@@ -46,6 +46,22 @@ const router = createRouter({
         title: '图片解析管理',
       },
     },
+    {
+      path: '/ocr',
+      name: 'ocr',
+      component: () => import('../views/OcrWebsocketView.vue'),
+      meta: {
+        title: 'OCR识别',
+      },
+    },
+    {
+      path: '/emotion-radar',
+      name: 'emotion-radar',
+      component: () => import('../views/EmotionRadarView.vue'),
+      meta: {
+        title: '情感雷达',
+      },
+    },
   ],
 })
 

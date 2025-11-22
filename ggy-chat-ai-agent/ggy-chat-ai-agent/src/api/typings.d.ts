@@ -1,4 +1,16 @@
 declare namespace API {
+  type BaseResponseListConsumeStatistic = {
+    code?: number
+    data?: ConsumeStatistic[]
+    message?: string
+  }
+
+  type BaseResponseMapStringObject = {
+    code?: number
+    data?: Record<string, any>
+    message?: string
+  }
+
   type BaseResponsePageChatContent = {
     code?: number
     data?: PageChatContent
@@ -15,17 +27,6 @@ declare namespace API {
     code?: number
     data?: PageImageAnalysis
     message?: string
-  }
-
-  type ChatBackgroundAnalysis = {
-    /** 关系类型 */
-    relationshipType?: string
-    /** 对话场景 */
-    conversationScene?: string
-    /** 话题性质 */
-    topicNature?: string
-    /** 用户语气特征 */
-    userToneCharacteristics?: string
   }
 
   type ChatContent = {
@@ -55,21 +56,46 @@ declare namespace API {
     id?: number
     chatId?: string
     totalTokens?: number
-    aiServiceType?: number
     promptTokens?: number
     completionTokens?: number
     userId?: number
     editTime?: string
     createTime?: string
     updateTime?: string
+    aiServiceType?: string
     isDelete?: number
   }
 
-  type doChatWithLoveAppSseEmitterParams = {
+  type continuationChatStreamParams = {
+    /** 情感指数参数 */
+    emotionalIndex: number
+    /** 情绪标签 */
+    emotionalLabels: string
+    /** 会话 id */
+    chatId: string
+  }
+
+  type doChatWithLoveAppSseEmitter1Params = {
     /** 用户消息内容 */
     message: string
     /** 聊天会话ID */
     chatId: string
+  }
+
+  type doChatWithLoveAppSseEmitterParams = {
+    /** 总提示词 */
+    message?: string
+    /** 情感指数参数 */
+    emotionalIndex: number
+    /** 会话ID */
+    chatId: string
+  }
+
+  type easyReturnParams = {
+    /** 情感指数参数 */
+    emotionalIndex: number
+    /** 聊天背景 */
+    conversationScene: string
   }
 
   type FeedbackMessage = {
@@ -137,6 +163,11 @@ declare namespace API {
   }
 
   type getRedisChatMemoryListParams = {
+    /** 聊天会话ID */
+    chatId: string
+  }
+
+  type getTokenStatsByChatIdParams = {
     /** 聊天会话ID */
     chatId: string
   }
@@ -245,45 +276,11 @@ declare namespace API {
     id: number
   }
 
-  type resuleJsonParams = {
-    /** 情感指数参数 */
-    emotionalIndex: number
-  }
-
-  type ResultInfo = {
-    backgroundAnalysis?: ChatBackgroundAnalysis
-    /** 整体情感指数(0-10分) */
-    overallEmotionalIndex?: number
-    /** 情感指数判断依据 */
-    emotionalReason?: string
-    /** 回复选项列表 */
-    messages?: ResultStructure[]
-  }
-
   type resultNoJsonParams = {
     /** 情感指数参数 */
     emotionalIndex: number
     /** 聊天背景 */
     conversationScene: string
-  }
-
-  type ResultStructure = {
-    /** 关系类型 */
-    relationshipType?: string
-    /** 对话场景 */
-    conversationScene?: string
-    /** 话题性质 */
-    topicNature?: string
-    /** 用户语气特征 */
-    userToneCharacteristics?: string
-    /** 整体情感指数(0-10分) */
-    overallEmotionalIndex?: number
-    /** 情感指数判断依据 */
-    emotionalReason?: string
-    /** 回复文本内容 */
-    message?: string
-    /** 该回复选项的情感指数(0-10分) */
-    emotionalIndex?: number
   }
 
   type SseEmitter = {

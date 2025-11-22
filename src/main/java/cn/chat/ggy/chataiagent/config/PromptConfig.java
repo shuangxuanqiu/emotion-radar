@@ -29,6 +29,19 @@ public class PromptConfig {
             throw new RuntimeException("Failed to load chat criterion prompt", e);
         }
     }
+    /**
+     * 情感雷达-续写提示词
+     * @return
+     */
+    @Bean(name="promptContinuationCriterion")
+    public String promptContinuationCriterion() {
+        try {
+            ClassPathResource resource = new ClassPathResource("prompt/chat-continuation-criterion.txt");
+            return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load chat criterion prompt", e);
+        }
+    }
 
     /**
      * 基础聊天的bean
@@ -43,7 +56,19 @@ public class PromptConfig {
             throw new RuntimeException("Failed to load chat criterion prompt", e);
         }
     }
-
+    /**
+     * 图片识别的 bean - 流式
+     * @return
+     */
+    @Bean(name="promptImageAnalysisStream")
+    public String promptImageAnalysisStream() {
+        try {
+            ClassPathResource resource = new ClassPathResource("prompt/image-analysis-stream.txt");
+            return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load image analysis prompt", e);
+        }
+    }
     /**
      * 图片识别的 bean
      * @return
@@ -52,6 +77,19 @@ public class PromptConfig {
     public String promptImageAnalysis() {
         try {
             ClassPathResource resource = new ClassPathResource("prompt/image-analysis.txt");
+            return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load image analysis prompt", e);
+        }
+    }
+    /**
+     * 图片识别的 bean
+     * @return
+     */
+    @Bean(name="promptImageAnalysisSimplify")
+    public String promptImageAnalysisSimplify() {
+        try {
+            ClassPathResource resource = new ClassPathResource("prompt/image-analysis2.txt");
             return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load image analysis prompt", e);

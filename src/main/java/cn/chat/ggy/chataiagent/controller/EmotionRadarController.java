@@ -1,5 +1,6 @@
 package cn.chat.ggy.chataiagent.controller;
 
+import cn.chat.ggy.chataiagent.app.ImageAnalysisSimplifyAPP;
 import cn.chat.ggy.chataiagent.model.dto.emotionRadar.ResultInfo;
 
 import cn.chat.ggy.chataiagent.model.VO.FeedbackMessageVO;
@@ -38,6 +39,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EmotionRadarController {
     @Resource
     private ChatAIAssistant chatAIAssistant;
+
+
+
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
     @Resource
@@ -74,6 +78,57 @@ public class EmotionRadarController {
         
         //存储来自用户的反馈信息
         feedbackMessageService.create(vo);
+    }
+
+    /**
+     * 核心服务 emotion-radar
+     * @param file
+     * @param emotionalIndex
+     * @return
+     * @throws IOException
+     */
+    @PostMapping(value = "/emotion-radar-easy", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.TEXT_HTML_VALUE)
+    @Operation(summary = "情感雷达核心服务", description = "上传图片进行AI情感分析，生成HTML格式的可视化分析报告")
+    public String easyReturn(
+            @Parameter(description = "上传的图片文件", required = true) @RequestParam("file") MultipartFile file,
+            @Parameter(description = "情感指数参数", required = true, example = "5") @RequestParam("emotionalIndex") Long emotionalIndex,
+            @Parameter(description = "聊天背景",required = true) @RequestParam("conversationScene") String conversationScene
+    ) throws IOException {
+        long startTime = System.currentTimeMillis();
+        String chatId = RandomUtil.randomString(6);
+        // 文件验证优化
+        ThrowUtils.throwIf(file == null || file.isEmpty(), ErrorCode.PARAMS_ERROR, "上传的文件不能为空");
+        // 文件大小限制 (10MB)
+//        ThrowUtils.throwIf(file.getSize() > 10 * 1024 * 1024, ErrorCode.PARAMS_ERROR, "文件大小不能超过10MB");
+        // 文件类型验证
+        String contentType = file.getContentType();
+        ThrowUtils.throwIf(contentType == null || !contentType.startsWith("image/"), ErrorCode.PARAMS_ERROR, "文件大小不能超过10MB");
+
+        log.info("开始处理图片分析请求 - 文件: {}, 大小: {} bytes, chatId: {}", file.getOriginalFilename(), file.getSize(), chatId);
+
+        try {
+            //将会话 id 放到ThreadLocal 中
+            MonitorContextHolder.setContext("chatId",chatId);
+            //核心内容，ai 解析
+            ResultInfo resultInfo = chatAIAssistant.chatHelpMeSimplify("请分析这张图片的内容:情感参数："+emotionalIndex, file, emotionalIndex, conversationScene,chatId);
+
+            //制作 html 文件
+            String resultUrl = chatAIAssistant.htmlStorage(resultInfo, chatId);
+            // 异步保存聊天内容到数据库（不阻塞接口返回）
+            chatContentService.saveChatContentAsync(resultInfo,chatId,resultUrl, null);
+            long endTime = System.currentTimeMillis();
+            log.info("方法 resultNoJson 执行成功 - 耗时: {} ms, chatId: {}, 结果URL: {}", endTime - startTime, chatId, resultUrl);
+            return resultUrl;
+
+        } catch (Exception e) {
+            long endTime = System.currentTimeMillis();
+            log.error("方法 resultNoJson 执行失败 - 耗时: {} ms, chatId: {}, 错误: {}", endTime - startTime, chatId, e.getMessage(), e);
+            throw e;
+        } finally {
+            // 清理监控上下文，避免内存泄漏
+            MonitorContextHolder.clearContext();
+        }
+
     }
 
     /**

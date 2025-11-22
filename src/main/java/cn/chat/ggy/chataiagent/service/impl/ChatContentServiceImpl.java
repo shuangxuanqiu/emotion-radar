@@ -60,6 +60,37 @@ public class ChatContentServiceImpl extends ServiceImpl<ChatContentMapper, ChatC
         }
     }
 
+
+    /**
+     * 异步保存聊天内容到数据库-纯文本整合-最后指南
+     * @param radarAnswer AI生成的结果信息
+     * @param userId 用户ID
+     */
+    @Async("databaseAsyncExecutor")
+    @Override
+    public void  saveRadarTextAsync(String radarAnswer, String chatId, String resultUrl, Long userId) {
+        try {
+            ChatContent chatContent = ChatContent.builder()
+                    .resultContent(radarAnswer)
+                    .userId(userId)
+                    .resultUrl(resultUrl)
+                    .chatId(chatId)
+                    .tokenQuantity(0L)
+                    .createTime(LocalDateTime.now())
+                    .updateTime(LocalDateTime.now())
+                    .isDelete(0)
+                    .build();
+            boolean saved = save(chatContent);
+            if (saved) {
+                log.info("深度回复文本保存成功 - chatId: {}", chatId);
+            } else {
+                log.error("深度回复文本保存失败 - chatId: {}", chatId);
+            }
+        } catch (Exception e) {
+            log.error("保存深度回复文本失败: {}", e.getMessage(), e);
+        }
+    }
+
     /**
      * 获取 QueryWrapper
      * @param chatContentQueryRequest

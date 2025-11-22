@@ -102,18 +102,10 @@ export async function resultNoJson(
   })
 }
 
-/** 系统健康检查 获取系统运行状态信息，包括缓存状态、活跃连接数等 GET /chat-ai/health */
-export async function healthCheck(options?: { [key: string]: any }) {
-  return request<Record<string, any>>('/chat-ai/health', {
-    method: 'GET',
-    ...(options || {}),
-  })
-}
-
-/** 图片情感分析(JSON格式) 上传图片进行AI情感分析，返回JSON格式的分析结果 POST /chat-ai/is-json */
-export async function resuleJson(
+/** 情感雷达核心服务 上传图片进行AI情感分析，生成HTML格式的可视化分析报告 POST /chat-ai/emotion-radar-easy */
+export async function easyReturn(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.resuleJsonParams,
+  params: API.easyReturnParams,
   body: {},
   file?: File,
   options?: { [key: string]: any }
@@ -140,7 +132,7 @@ export async function resuleJson(
     }
   })
 
-  return request<API.ResultInfo>('/chat-ai/is-json', {
+  return request<string>('/chat-ai/emotion-radar-easy', {
     method: 'POST',
     params: {
       ...params,
@@ -151,10 +143,18 @@ export async function resuleJson(
   })
 }
 
+/** 系统健康检查 获取系统运行状态信息，包括缓存状态、活跃连接数等 GET /chat-ai/health */
+export async function healthCheck(options?: { [key: string]: any }) {
+  return request<Record<string, any>>('/chat-ai/health', {
+    method: 'GET',
+    ...(options || {}),
+  })
+}
+
 /** SSE流式对话 建立SSE连接，实现AI流式对话功能 GET /chat-ai/travel_guide/chat/sse/emitter */
-export async function doChatWithLoveAppSseEmitter(
+export async function doChatWithLoveAppSseEmitter1(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.doChatWithLoveAppSseEmitterParams,
+  params: API.doChatWithLoveAppSseEmitter1Params,
   options?: { [key: string]: any }
 ) {
   return request<API.SseEmitter>('/chat-ai/travel_guide/chat/sse/emitter', {

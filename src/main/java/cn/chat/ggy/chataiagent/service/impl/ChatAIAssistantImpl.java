@@ -1,6 +1,7 @@
 package cn.chat.ggy.chataiagent.service.impl;
 
 import cn.chat.ggy.chataiagent.Constant.AppConstant;
+import cn.chat.ggy.chataiagent.app.ImageAnalysisSimplifyAPP;
 import cn.chat.ggy.chataiagent.app.chatScene.ChatJobAPP;
 import cn.chat.ggy.chataiagent.app.chatScene.DefaultAllAPP;
 import cn.chat.ggy.chataiagent.app.routingAPP;
@@ -31,7 +32,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ChatAIAssistantImpl implements ChatAIAssistant {
 
-
+    @Resource
+    private ImageAnalysisSimplifyAPP imageAnalysisSimplifyAPP;
     @Resource
     private ChatBotApp chatBotApp;
     @Resource
@@ -82,9 +84,8 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
                 CompletableFuture<String> imageAnalysisFuture = CompletableFuture
                         .supplyAsync(() -> {
                             log.info("图片分析任务开始");
-                            UserInfoList userInfoList = imageAnalysisAPP.ocrImage(
+                            String result = imageAnalysisAPP.ocrImageText(
                                     "请分析这张聊天界面截图中的内容", file, chatId);
-                            String result = JSONUtil.toJsonStr(userInfoList);
                             log.info("图片分析任务完成");
                             return result;
                         })
@@ -246,7 +247,12 @@ public class ChatAIAssistantImpl implements ChatAIAssistant {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "HTML生成失败: " + e.getMessage());
         }
     }
-    
+
+    @Override
+    public ResultInfo chatHelpMeSimplify(String prompt, MultipartFile file, Long emotionalIndex, String conversationScene, String chatId) {
+        return  imageAnalysisSimplifyAPP.ocrImage(prompt, file, chatId);
+    }
+
     /**
      * 内部类：用于存储图片分析和路由判断的组合结果
      */

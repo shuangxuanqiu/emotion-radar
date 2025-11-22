@@ -2,6 +2,20 @@
 /* eslint-disable */
 import request from '@/request'
 
+/** 获取指定聊天会话的token统计 根据chatId查询该会话的所有token消耗记录 GET /consumeStatistic/chat/${param0} */
+export async function getTokenStatsByChatId(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.getTokenStatsByChatIdParams,
+  options?: { [key: string]: any }
+) {
+  const { chatId: param0, ...queryParams } = params
+  return request<API.BaseResponseListConsumeStatistic>(`/consumeStatistic/chat/${param0}`, {
+    method: 'GET',
+    params: { ...queryParams },
+    ...(options || {}),
+  })
+}
+
 /** 获取Token消费统计详情 根据主键ID获取单个Token消费统计的详细信息 GET /consumeStatistic/getInfo/${param0} */
 export async function getInfo2(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -63,6 +77,22 @@ export async function save2(body: API.ConsumeStatistic, options?: { [key: string
       'Content-Type': 'application/json',
     },
     data: body,
+    ...(options || {}),
+  })
+}
+
+/** 按AI服务类型统计token消耗 统计不同AI服务类型的token消耗情况 GET /consumeStatistic/summary/by-service-type */
+export async function getTokenStatsByServiceType(options?: { [key: string]: any }) {
+  return request<API.BaseResponseMapStringObject>('/consumeStatistic/summary/by-service-type', {
+    method: 'GET',
+    ...(options || {}),
+  })
+}
+
+/** 获取今日token统计总览 获取今日所有AI服务的token消耗统计概览 GET /consumeStatistic/today/overview */
+export async function getTodayTokenStatsOverview(options?: { [key: string]: any }) {
+  return request<API.BaseResponseMapStringObject>('/consumeStatistic/today/overview', {
+    method: 'GET',
     ...(options || {}),
   })
 }

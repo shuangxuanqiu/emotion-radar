@@ -5,6 +5,7 @@ import cn.chat.ggy.chataiagent.model.dto.chatcontent.ChatContentQueryRequest;
 import com.mybatisflex.core.service.IService;
 import com.mybatisflex.core.query.QueryWrapper;
 import cn.chat.ggy.chataiagent.model.entity.ChatContent;
+import org.springframework.scheduling.annotation.Async;
 
 /**
  * 对话内容表 服务层。
@@ -15,6 +16,11 @@ public interface ChatContentService extends IService<ChatContent> {
 
 
     void saveChatContentAsync(ResultInfo resultInfo,String chatId,String resultUrl, Long userId);
+
+
+
+    @Async("databaseAsyncExecutor")
+    void  saveRadarTextAsync(String radarAnswer, String chatId, String resultUrl, Long userId);
 
     QueryWrapper getQueryWrapper(ChatContentQueryRequest chatContentQueryRequest);
 }

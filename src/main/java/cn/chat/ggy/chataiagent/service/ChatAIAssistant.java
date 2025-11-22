@@ -10,4 +10,6 @@ public interface ChatAIAssistant {
 
 
     String htmlStorage(ResultInfo resultInfo, String chatId);
+
+    ResultInfo chatHelpMeSimplify(String prompt,MultipartFile file, Long emotionalIndex, String conversationScene, String chatId);
 }

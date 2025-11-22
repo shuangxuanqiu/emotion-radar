@@ -59,6 +59,14 @@ const menuItems = ref<MenuProps['items']>([
         key: '/image-analysis',
         label: '图片解析',
     },
+    {
+        key: '/ocr',
+        label: 'OCR识别',
+    },
+    {
+        key: '/emotion-radar',
+        label: '情感雷达',
+    },
 ])
 
 // 当前选中的菜单项
@@ -80,7 +88,7 @@ const handleLogin = () => {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
+    box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.1),
         0 1px 0 rgba(255, 255, 255, 0.5) inset;
     padding: 0;

@@ -12,7 +12,7 @@ spring:
           model: qwen-plus
       chat-vl:
         options:
-          model: qwen-vl-plus-latest
+          model: qwen3-vl-plus
 #          model: qwen3-vl-plus-2025-09-23
       # DeepSeek 模型配置
       deepseek:
