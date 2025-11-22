@@ -157,10 +157,12 @@ public class ChatAIAssistantStreamImpl implements ChatAIAssistantStream {
                                     safeSendString(emitter, "result", json);
                                 } catch (Exception ignore) {}
                             }
+                            System.out.println("续写返回的结果："+dsBuffer.toString());
                             safeSendMap(emitter, "complete", Map.of("type", "complete", "message", "续写完成"));
                             emitter.complete();
                         }
                 );
+
         return emitter;
     }
 
@@ -183,7 +185,6 @@ public class ChatAIAssistantStreamImpl implements ChatAIAssistantStream {
         
         以下是图像OCR还原的聊天记录（逐行换行，禁止合并）：
         {ocrText}
-        
         仅输出符合此 JSON Schema 的内容：
         {jsonSchema}
         """;
@@ -244,7 +245,7 @@ public class ChatAIAssistantStreamImpl implements ChatAIAssistantStream {
         
         情感指数: {emotionalIndex}
         情绪标签: {emotionalLabels}
-        
+       
         仅以 NDJSON 输出（每行一个 JSON 对象），不得包含多余说明：
         {jsonSchema}
         """;

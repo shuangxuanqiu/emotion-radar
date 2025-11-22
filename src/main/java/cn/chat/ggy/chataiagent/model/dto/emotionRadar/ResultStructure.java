@@ -34,4 +34,8 @@ public class ResultStructure {
     // 该回复选项的情感指数（兼容原有字段）
     @Schema(description = "该回复选项的情感指数(0-10分)", example = "7")
     private Integer emotionalIndex;
+
+    // 本条消息状态 0-默认生成  1-续写
+    @Schema(description = "消息状态（0-默认生成  1-续写）", example = " 0")
+    private Integer  messageType;
 }

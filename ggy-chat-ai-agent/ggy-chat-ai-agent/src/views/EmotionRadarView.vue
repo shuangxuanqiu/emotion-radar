@@ -153,7 +153,22 @@
             <a-button type="dashed" size="small" @click="toggleAddTag">添加标签</a-button>
           </a-space>
         </div>
-        <div class="message fade-in" v-for="(m, i) in deepseekResult?.messages || []" :key="i">
+        <div class="message fade-in" v-for="(m, i) in deepseekResult?.messages || []" :key="i"
+          :class="{ 'celebrate': m.celebrate, 'loading-card': m.loading }">
+          <div v-if="m.celebrate" class="celebrate-overlay">
+            <span class="confetti c1"></span>
+            <span class="confetti c2"></span>
+            <span class="confetti c3"></span>
+            <span class="confetti c4"></span>
+            <span class="confetti c5"></span>
+            <span class="confetti c6"></span>
+            <span class="confetti c7"></span>
+            <span class="confetti c8"></span>
+            <span class="confetti c9"></span>
+            <span class="confetti c10"></span>
+            <span class="confetti c11"></span>
+            <span class="confetti c12"></span>
+          </div>
           <a-space wrap style="margin-bottom: 8px;">
             <a-tag color="geekblue" v-if="m.conversationScene">{{ m.conversationScene }}</a-tag>
             <a-tag color="orange" v-if="m.relationshipType">{{ m.relationshipType }}</a-tag>
@@ -162,8 +177,18 @@
             <a-tag color="green" v-if="typeof m.emotionalIndex === 'number'">情感: {{ m.emotionalIndex }}</a-tag>
           </a-space>
           <div class="emotion-index" v-if="m.emotionalReason">{{ m.emotionalReason }}</div>
-          <div class="message-content">{{ m.message }}</div>
-          <button class="copy-btn" type="button"
+          <div v-if="m.loading" class="loading-container">
+            <div class="loading-header">
+              <span class="loading-text-plain">AI 正在续写</span>
+              <span class="typing-dots"><i></i><i></i><i></i></span>
+            </div>
+            <div class="loading-progress">
+              <div class="bar"></div>
+            </div>
+            <a-skeleton active :paragraph="{ rows: 2 }" :title="false" />
+          </div>
+          <div v-else class="message-content">{{ m.message }}</div>
+          <button v-if="!m.loading" class="copy-btn" type="button"
             @click="copyMessage(m.message || '', m.emotionalIndex, $event)">复制</button>
         </div>
         <div v-if="processing && (!deepseekResult?.messages || deepseekResult?.messages.length === 0)"
@@ -221,6 +246,7 @@ type DeepSeekMessage = {
   relationshipType?: string
   topicNature?: string
   userToneCharacteristics?: string
+  messageType?: number
 }
 
 type DeepSeekResult = {
@@ -263,19 +289,111 @@ const handleEmotionTagClick = async (label: string) => {
   const idx = typeof deepseekResult.value?.overallEmotionalIndex === 'number' ? (deepseekResult.value as DeepSeekResult).overallEmotionalIndex as number : 6
   const chatId = (chatIdInput.value || generateChatId()).trim()
   const params = { emotionalIndex: idx, emotionalLabels: label, chatId }
-  console.log('continuationChatStream params:', params)
-  try {
-    const resp = await api.emotionRadarStreamController.continuationChatStream(params)
-    console.log('continuationChatStream resp:', resp)
-  } catch (e) {
-    console.log('continuationChatStream error:', e)
-  }
   if (!deepseekResult.value) { deepseekResult.value = { messages: [] } }
-  const msg: DeepSeekMessage = { conversationScene: '续写', topicNature: '情绪标签', userToneCharacteristics: label, emotionalIndex: idx, message: `[续写触发] ${label}` }
-  deepseekResult.value!.messages = [msg, ...((deepseekResult.value!.messages as DeepSeekMessage[]) || [])]
+  const existing = (deepseekResult.value!.messages as DeepSeekMessage[]) || []
+  const placeholder: DeepSeekMessage = { conversationScene: '续写中', topicNature: '情绪标签', userToneCharacteristics: label, emotionalIndex: idx, message: '正在续写...', messageType: 1, loading: true }
+  deepseekResult.value!.messages = [placeholder, ...existing]
+  try {
+    await startContinuationStream(params)
+  } catch (e) {
+
+  }
   const existingJson = deepseekResult.value ? JSON.stringify(deepseekResult.value) : ''
   const requestJson = JSON.stringify(params)
   combinedText.value += (existingJson ? existingJson + '\n' : '') + requestJson + '\n'
+}
+
+const startContinuationStream = async (p: { emotionalIndex: number; emotionalLabels: string; chatId: string }) => {
+  if (continuationAbortController) { continuationAbortController.abort(); continuationAbortController = null }
+  continuationAbortController = new AbortController()
+  const qs = new URLSearchParams({ emotionalIndex: String(p.emotionalIndex), emotionalLabels: p.emotionalLabels, chatId: p.chatId }).toString()
+  const url = `/api/stream-ai/travel_guide/chat/sse/continuation?${qs}`
+  try {
+    const response = await fetch(url, { method: 'POST', signal: continuationAbortController.signal, credentials: 'include' })
+    if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`) }
+    if (!response.body) { throw new Error('Response body is null') }
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let currentEvent: string | null = null
+    let sessionText = ''
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() || ''
+      for (const line of lines) {
+        const trimmedLine = line.trim()
+        if (!trimmedLine) continue
+        if (trimmedLine.startsWith('event:')) { currentEvent = trimmedLine.slice(6).trim(); continue }
+        if (trimmedLine.startsWith('data:')) {
+          const idx = line.indexOf('data:')
+          const dataStr = idx >= 0 ? line.slice(idx + 5) : trimmedLine.slice(5)
+          if (dataStr) {
+            try {
+              const data = JSON.parse(dataStr) as StreamLogData
+              handleSSEMessage(currentEvent as StreamLog['type'] | null, data)
+              const frag = extractTextFragment(data)
+              if (frag) { sessionText += frag }
+            } catch {
+              handleSSEMessage('text', dataStr)
+              sessionText += dataStr
+            }
+          }
+          currentEvent = null
+        }
+      }
+    }
+    if (buffer.trim()) {
+      const trimmedBuffer = buffer.trim()
+      if (trimmedBuffer.startsWith('event:')) { currentEvent = trimmedBuffer.slice(6).trim() }
+      else if (trimmedBuffer.startsWith('data:')) {
+        const dataStr = buffer.slice(buffer.indexOf('data:') + 5)
+        if (dataStr) {
+          try { const data = JSON.parse(dataStr) as StreamLogData; handleSSEMessage(currentEvent as StreamLog['type'] | null, data); const frag = extractTextFragment(data); if (frag) { sessionText += frag } }
+          catch { handleSSEMessage('text', dataStr); sessionText += dataStr }
+        }
+      }
+    }
+
+    const msgs = parseContinuationMessages(sessionText)
+    if (msgs.length) {
+      if (!deepseekResult.value) { deepseekResult.value = { messages: [] } }
+      const existing = (deepseekResult.value!.messages as DeepSeekMessage[]) || []
+      if (existing[0] && existing[0].loading) { existing.shift() }
+      msgs.forEach((m) => { (m as any).celebrate = true })
+      deepseekResult.value!.messages = [...msgs, ...existing]
+      console.log('messages after continuation:', JSON.stringify(deepseekResult.value!.messages))
+
+    }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : '续写失败'
+    console.log('continuation SSE error:', errorMessage)
+  }
+}
+
+const parseContinuationMessages = (text: string): DeepSeekMessage[] => {
+  const result: DeepSeekMessage[] = []
+  if (!text) return result
+  const matches = text.match(/\{[\s\S]*?\}/g) || []
+  for (const m of matches) {
+    try {
+      const obj = JSON.parse(m)
+      const msg: DeepSeekMessage = {
+        conversationScene: obj.conversationScene,
+        emotionalIndex: obj.emotionalIndex,
+        emotionalReason: obj.emotionalReason,
+        message: obj.message,
+        relationshipType: obj.relationshipType,
+        topicNature: obj.topicNature,
+        userToneCharacteristics: obj.userToneCharacteristics,
+        messageType: 1,
+      }
+      result.push(msg)
+    } catch { }
+  }
+  return result
 }
 
 interface UploadFile { uid: string; name: string; status?: string; originFileObj?: File }
@@ -290,6 +408,7 @@ const imageUrl = computed(() => {
 })
 
 let abortController: AbortController | null = null
+let continuationAbortController: AbortController | null = null
 
 interface StreamLogData {
   type?: string
@@ -336,7 +455,10 @@ const mergeDeepseekResult = (obj: DeepSeekResult) => {
   if (obj.backgroundAnalysis) { cur.backgroundAnalysis = { ...(cur.backgroundAnalysis || {}), ...obj.backgroundAnalysis } }
   if (typeof obj.overallEmotionalIndex === 'number') { cur.overallEmotionalIndex = obj.overallEmotionalIndex }
   if (obj.emotionalReason) { cur.emotionalReason = obj.emotionalReason }
-  if (Array.isArray(obj.messages) && obj.messages.length) { cur.messages = [...(cur.messages || []), ...obj.messages] }
+  if (Array.isArray(obj.messages) && obj.messages.length) {
+    const normalized = obj.messages.map((m) => ({ ...m, messageType: typeof (m as any).messageType === 'number' ? (m as any).messageType : 0 }))
+    cur.messages = [...(cur.messages || []), ...normalized]
+  }
   deepseekResult.value = { ...cur }
 }
 const parseTaggedContentIncremental = (incoming: string) => {
@@ -1047,6 +1169,213 @@ onMounted(() => {
   word-break: break-word;
 }
 
+.loading-text {
+  background: linear-gradient(90deg, #dddddd 0%, #eeeeee 50%, #dddddd 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 1.5s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+
+
+.celebrate {
+  animation: celebratePop 2s ease-out;
+}
+
+@keyframes celebratePop {
+  0% {
+    transform: scale(0.96);
+  }
+
+  70% {
+    transform: scale(1.06);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.celebrate::after {
+  content: '🎉';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 24px;
+  animation: floatUp 1s ease-out;
+  opacity: 0;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-16px);
+    opacity: 0;
+  }
+}
+
+.celebrate-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.confetti {
+  position: absolute;
+  bottom: 8px;
+  width: 8px;
+  height: 18px;
+  border-radius: 2px;
+  transform: translate(0, 0) rotate(0);
+  opacity: 0;
+  animation: confettiFly 1s ease-out forwards;
+}
+
+.c1 {
+  left: 5%;
+  background: #ff7f50;
+  --dx: 60px;
+}
+
+.c2 {
+  left: 15%;
+  background: #ffd700;
+  --dx: 80px;
+}
+
+.c3 {
+  left: 28%;
+  background: #7fffd4;
+  --dx: 100px;
+}
+
+.c4 {
+  left: 42%;
+  background: #adff2f;
+  --dx: 120px;
+}
+
+.c5 {
+  left: 58%;
+  background: #87cefa;
+  --dx: 140px;
+}
+
+.c6 {
+  left: 70%;
+  background: #ff69b4;
+  --dx: 160px;
+}
+
+.c7 {
+  left: 78%;
+  background: #ffa500;
+  --dx: 180px;
+}
+
+.c8 {
+  left: 85%;
+  background: #00fa9a;
+  --dx: 200px;
+}
+
+.c9 {
+  left: 90%;
+  background: #ba55d3;
+  --dx: 220px;
+}
+
+.c10 {
+  left: 35%;
+  background: #87cefa;
+  --dx: 110px;
+}
+
+.c11 {
+  left: 50%;
+  background: #ff7f50;
+  --dx: 150px;
+}
+
+.c12 {
+  left: 95%;
+  background: #ffd700;
+  --dx: 240px;
+}
+
+@keyframes confettiFly {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--dx), -160%) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.emoji {
+  position: absolute;
+  bottom: 0;
+  font-size: 20px;
+  transform: translate(0, 0) scale(0.9);
+  opacity: 0;
+  animation: emojiRise 1s ease-out forwards;
+}
+
+.e1 {
+  left: 12%;
+}
+
+.e2 {
+  left: 50%;
+}
+
+.e3 {
+  left: 88%;
+}
+
+@keyframes emojiRise {
+  0% {
+    transform: translate(0, 8px) scale(0.9);
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(160px, -80px) scale(1);
+    opacity: 0;
+  }
+}
+
 .copy-btn {
   position: absolute;
   top: 15px;
@@ -1100,6 +1429,111 @@ onMounted(() => {
 .clickable-tag {
   cursor: pointer;
   user-select: none;
+}
+
+.loading-card {
+  border: 2px solid transparent;
+  background: linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, #667eea, #764ba2) border-box;
+  background-size: 100% 100%, 200% 100%;
+  animation: borderPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+  0% {
+    background-position: 0 0, 0% 0;
+    box-shadow: 0 0 0 rgba(118, 75, 162, 0.0);
+  }
+
+  50% {
+    background-position: 0 0, 100% 0;
+    box-shadow: 0 6px 18px rgba(118, 75, 162, 0.18);
+  }
+
+  100% {
+    background-position: 0 0, 0% 0;
+    box-shadow: 0 0 0 rgba(118, 75, 162, 0.0);
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loading-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #764ba2;
+}
+
+.loading-text-plain {
+  letter-spacing: 0.5px;
+}
+
+.typing-dots i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #764ba2;
+  margin-right: 3px;
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+
+.typing-dots i:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots i:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotPulse {
+
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.loading-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 6px;
+  background: #eee;
+  overflow: hidden;
+}
+
+.loading-progress .bar {
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 6px;
+  animation: progressSlide 1.6s ease-in-out infinite;
+}
+
+@keyframes progressSlide {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  50% {
+    transform: translateX(60%);
+  }
+
+  100% {
+    transform: translateX(220%);
+  }
 }
 
 /* 背景分析卡片 */
