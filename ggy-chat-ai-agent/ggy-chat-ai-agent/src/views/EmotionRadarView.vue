@@ -58,16 +58,36 @@
       <a-card class="glass-card" :bordered="false">
         <div class="section-title">👁️ 预览</div>
         <div class="image-stage">
-          <div class="scan-overlay" v-if="processing"></div>
+          <canvas v-if="processing" ref="radarCanvas" class="scan-canvas"></canvas>
           <div class="image-container">
-            <img v-if="imageUrl" :src="imageUrl" class="preview-img" />
+            <img v-if="imageUrl" :src="imageUrl" class="preview-img" alt="聊天截图预览" />
           </div>
         </div>
       </a-card>
 
       <a-card class="glass-card" :bordered="false" style="margin-top: 16px">
-        <div class="section-title">✏️ 总提示词</div>
-        <a-textarea v-model:value="totalPrompt" :rows="6" placeholder="请输入本次识别的总提示词..." allow-clear />
+        <div class="section-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <span>✏️ 总提示词</span>
+          <a-switch v-model:checked="isComplexMode" checked-children="复杂模式" un-checked-children="简单模式" />
+        </div>
+
+        <div v-if="!isComplexMode">
+          <a-textarea v-model:value="totalPrompt" :rows="6" placeholder="请输入本次识别的总提示词..." allow-clear />
+        </div>
+        <div v-else>
+          <a-collapse v-model:activeKey="activeKey" accordion ghost>
+            <a-collapse-panel key="1" header="总提示词 (message)">
+              <a-textarea v-model:value="totalPrompt" :rows="4" placeholder="请识别这张聊天界面截图..." allow-clear />
+            </a-collapse-panel>
+            <a-collapse-panel key="2" header="情绪背景 (conversationScene)">
+              <a-input v-model:value="conversationScene" placeholder="例如：工作朋友" allow-clear />
+            </a-collapse-panel>
+            <a-collapse-panel key="3" header="情感指数参数 (emotionalIndex)">
+              <a-input-number v-model:value="emotionalIndex" :min="0" :max="10" style="width: 100%"
+                placeholder="例如：5" />
+            </a-collapse-panel>
+          </a-collapse>
+        </div>
         <a-space style="margin-top: 12px">
           <a-button type="primary" :disabled="!canStart" @click="startStream" size="middle" shape="round">
             <template #icon>
@@ -84,9 +104,11 @@
           </a-button>
         </a-space>
         <a-alert v-if="errorMsg" style="margin-top: 12px" type="error" :message="errorMsg" show-icon />
-        <div v-if="processing" style="margin-top: 12px">
-          <LoadingSpinner text="识别中..." type="wave" />
-          <a-progress :percent="progressPercent" status="active" />
+        <div v-if="processing" style="margin-top: 16px; text-align: center;">
+          <div class="dynamic-loading-text fade-in-text">{{ currentLoadingText }}</div>
+          <LoadingSpinner :text="''" type="wave" />
+          <a-progress :percent="progressPercent" status="active"
+            :stroke-color="{ '0%': '#108ee9', '100%': '#87d068' }" />
         </div>
       </a-card>
     </div>
@@ -132,9 +154,7 @@
       </div>
       <div class="image-analysis-section" style="margin-top: 12px;">
         <div class="section-title" style="margin-bottom:8px;">🖼️ 截图解析</div>
-        <div class="message" v-if="imageExtractText">
-          <div class="message-content">{{ imageExtractText }}</div>
-        </div>
+
         <div class="background-info" v-if="imageDetailsText">
           <div class="background-title">截图细节</div>
           <div class="background-value" style="margin-left:0">{{ imageDetailsText }}</div>
@@ -146,55 +166,61 @@
       <div class="message-list" style="margin-top: 12px;">
         <div class="emotion-tags-toolbar" style="margin-bottom: 12px;">
           <a-space wrap>
-            <a-tag v-for="t in emotionTags" :key="t" class="clickable-tag" @click="handleEmotionTagClick(t)">{{ t
+            <a-tag v-for="t in emotionTags" :key="t" class="clickable-tag" :disabled="continuationRunning"
+              @click="handleEmotionTagClick(t)">{{ t
               }}</a-tag>
             <a-input v-if="addTagVisible" v-model:value="newTag" placeholder="输入标签" style="width: 160px" />
             <a-button v-if="addTagVisible" type="primary" size="small" @click="confirmAddTag">添加</a-button>
             <a-button type="dashed" size="small" @click="toggleAddTag">添加标签</a-button>
           </a-space>
         </div>
-        <div class="message fade-in" v-for="(m, i) in deepseekResult?.messages || []" :key="i"
-          :class="{ 'celebrate': m.celebrate, 'loading-card': m.loading }">
-          <div v-if="m.celebrate" class="celebrate-overlay">
-            <span class="confetti c1"></span>
-            <span class="confetti c2"></span>
-            <span class="confetti c3"></span>
-            <span class="confetti c4"></span>
-            <span class="confetti c5"></span>
-            <span class="confetti c6"></span>
-            <span class="confetti c7"></span>
-            <span class="confetti c8"></span>
-            <span class="confetti c9"></span>
-            <span class="confetti c10"></span>
-            <span class="confetti c11"></span>
-            <span class="confetti c12"></span>
-          </div>
-          <a-space wrap style="margin-bottom: 8px;">
-            <a-tag color="geekblue" v-if="m.conversationScene">{{ m.conversationScene }}</a-tag>
-            <a-tag color="orange" v-if="m.relationshipType">{{ m.relationshipType }}</a-tag>
-            <a-tag color="purple" v-if="m.topicNature">{{ m.topicNature }}</a-tag>
-            <a-tag color="cyan" v-if="m.userToneCharacteristics">{{ m.userToneCharacteristics }}</a-tag>
-            <a-tag color="green" v-if="typeof m.emotionalIndex === 'number'">情感: {{ m.emotionalIndex }}</a-tag>
-          </a-space>
-          <div class="emotion-index" v-if="m.emotionalReason">{{ m.emotionalReason }}</div>
-          <div v-if="m.loading" class="loading-container">
-            <div class="loading-header">
-              <span class="loading-text-plain">AI 正在续写</span>
-              <span class="typing-dots"><i></i><i></i><i></i></span>
+        <transition-group name="list-fade">
+          <div class="message fade-in" v-for="(m, i) in deepseekResult?.messages || []"
+            :key="(m.messageType || 0) + '-' + i" :class="{ 'celebrate': m.celebrate, 'loading-card': m.loading }">
+            <div v-if="m.celebrate" class="celebrate-overlay">
+              <span class="confetti c1"></span>
+              <span class="confetti c2"></span>
+              <span class="confetti c3"></span>
+              <span class="confetti c4"></span>
+              <span class="confetti c5"></span>
+              <span class="confetti c6"></span>
+              <span class="confetti c7"></span>
+              <span class="confetti c8"></span>
+              <span class="confetti c9"></span>
+              <span class="confetti c10"></span>
+              <span class="confetti c11"></span>
+              <span class="confetti c12"></span>
             </div>
-            <div class="loading-progress">
-              <div class="bar"></div>
+            <a-space wrap style="margin-bottom: 8px;">
+              <a-tag color="geekblue" v-if="m.conversationScene">{{ m.conversationScene }}</a-tag>
+              <a-tag color="orange" v-if="m.relationshipType">{{ m.relationshipType }}</a-tag>
+              <a-tag color="purple" v-if="m.topicNature">{{ m.topicNature }}</a-tag>
+              <a-tag color="cyan" v-if="m.userToneCharacteristics">{{ m.userToneCharacteristics }}</a-tag>
+              <a-tag color="green" v-if="typeof m.emotionalIndex === 'number'">情感: {{ m.emotionalIndex }}</a-tag>
+            </a-space>
+            <div class="emotion-index" v-if="m.emotionalReason">{{ m.emotionalReason }}</div>
+            <div v-if="m.loading" class="loading-container">
+              <div class="loading-header">
+                <span class="loading-text-plain">AI 正在续写</span>
+                <span class="typing-dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="loading-progress">
+                <div class="bar"></div>
+              </div>
+              <a-skeleton active :paragraph="{ rows: 2 }" :title="false" />
             </div>
-            <a-skeleton active :paragraph="{ rows: 2 }" :title="false" />
+            <div v-else class="message-content">{{ m.message }}</div>
+            <button v-if="!m.loading" class="copy-btn" type="button"
+              @click="copyMessage(m.message || '', m.emotionalIndex, $event)">复制</button>
           </div>
-          <div v-else class="message-content">{{ m.message }}</div>
-          <button v-if="!m.loading" class="copy-btn" type="button"
-            @click="copyMessage(m.message || '', m.emotionalIndex, $event)">复制</button>
-        </div>
+        </transition-group>
         <div v-if="processing && (!deepseekResult?.messages || deepseekResult?.messages.length === 0)"
           style="padding: 12px;">
           <a-skeleton active :paragraph="{ rows: 3 }" />
         </div>
+      </div>
+      <div class="message" v-if="imageExtractText">
+        <div class="message-content">{{ imageExtractText }}</div>
       </div>
     </a-card>
 
@@ -205,7 +231,7 @@
         <a-button size="small" type="link" @click="clearStreamLogs" style="float: right; padding: 0;">清空日志</a-button>
       </template>
       <div class="stream-plain">
-        <pre class="stream-plain-text">{{ combinedText || '暂无返回内容' }}</pre>
+        <pre class="stream-plain-text" aria-live="polite">{{ combinedText || '暂无返回内容' }}</pre>
       </div>
     </a-card>
   </div>
@@ -213,7 +239,7 @@
 
 <script setup lang="ts">
 /// <reference types="@/api/typings" />
-import { ref, computed, onBeforeUnmount, onMounted } from 'vue'
+import { ref, computed, onBeforeUnmount, onMounted, watch, nextTick } from 'vue'
 import { message } from 'ant-design-vue'
 import { UploadOutlined, PlayCircleOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
@@ -221,6 +247,19 @@ import { useRoute } from 'vue-router'
 import api from '@/api'
 import { getImageDisplayUrl } from '@/utils/image'
 
+// =================================================================================================
+// ✨ 类型定义
+// =================================================================================================
+
+/**
+ * @description OCR 识别结果的单项。
+ * @property {string} text - 识别出的文本内容。
+ * @property {number} [confidence] - 文本识别的置信度。
+ * @property {string} [sender] - 消息发送者。
+ * @property {number} [lineIndex] - 文本所在的行索引。
+ * @property {number} [page] - 文本所在的页面编号。
+ * @property {boolean | null} [isComplete] - 该项是否已处理完成。
+ */
 type OcrItem = {
   text: string
   confidence?: number
@@ -230,6 +269,13 @@ type OcrItem = {
   isComplete?: boolean | null
 }
 
+/**
+ * @description DeepSeek 返回的聊天背景分析。
+ * @property {string} [conversationScene] - 对话场景。
+ * @property {string} [relationshipType] - 关系类型。
+ * @property {string} [topicNature] - 话题性质。
+ * @property {string} [userToneCharacteristics] - 用户语气特征。
+ */
 type DeepSeekBackground = {
   conversationScene?: string
   relationshipType?: string
@@ -237,6 +283,20 @@ type DeepSeekBackground = {
   userToneCharacteristics?: string
 }
 
+/**
+ * @description DeepSeek 返回的单条消息分析或建议。
+ * @property {string} [conversationScene] - 对话场景。
+ * @property {number} [emotionalIndex] - 情感指数。
+ * @property {string} [emotionalReason] - 情感分析的原因。
+ * @property {string} [message] - 生成的回复建议。
+ * @property {number} [overallEmotionalIndex] - 整体情感指数。
+ * @property {string} [relationshipType] - 关系类型。
+ * @property {string} [topicNature] - 话题性质。
+ * @property {string} [userToneCharacteristics] - 用户语气特征。
+ * @property {number} [messageType] - 消息类型（例如，1 代表续写）。
+ * @property {boolean} [loading] - 是否处于加载状态（用于 UI 显示）。
+ * @property {boolean} [celebrate] - 是否触发庆祝动画（用于 UI 显示）。
+ */
 type DeepSeekMessage = {
   conversationScene?: string
   emotionalIndex?: number
@@ -247,8 +307,17 @@ type DeepSeekMessage = {
   topicNature?: string
   userToneCharacteristics?: string
   messageType?: number
+  loading?: boolean
+  celebrate?: boolean
 }
 
+/**
+ * @description DeepSeek API 返回的完整结果结构。
+ * @property {DeepSeekBackground} [backgroundAnalysis] - 聊天背景分析。
+ * @property {string} [emotionalReason] - 整体情感分析的原因。
+ * @property {DeepSeekMessage[]} [messages] - 消息分析和建议列表。
+ * @property {number} [overallEmotionalIndex] - 整体情感指数。
+ */
 type DeepSeekResult = {
   backgroundAnalysis?: DeepSeekBackground
   emotionalReason?: string
@@ -256,28 +325,70 @@ type DeepSeekResult = {
   overallEmotionalIndex?: number
 }
 
+// =================================================================================================
+// ✨ 核心状态管理
+// =================================================================================================
+
+// --- 基本状态 ---
+/** @description 是否正在进行 AI 识别或处理 */
 const processing = ref(false)
+/** @description 存储错误信息，用于在 UI 上显示 */
 const errorMsg = ref('')
+
+// --- 进度与识别结果 ---
+/** @description 当前处理进度 */
 const progressIndex = ref(0)
+/** @description 总处理任务数 */
 const progressTotal = ref(0)
+/** @description 存储 OCR 识别出的文本项 */
 const items = ref<OcrItem[]>([])
+/** @description 实时组合的流式返回文本，用于日志显示 */
 const combinedText = ref('')
+/** @description 用户输入的总提示词 */
 const totalPrompt = ref('')
-const canStart = computed(() => !!imageBase64Raw.value && !processing.value && !!totalPrompt.value?.trim())
-const hasContent = computed(() => !!imageBase64Raw.value || items.value.length > 0 || !!imageExtractText.value || !!imageDetailsText.value || !!deepseekResult.value)
-const generateChatId = (): string => {
-  return `ocr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-}
-const chatIdInput = ref(generateChatId())
-const refreshChatId = () => {
-  chatIdInput.value = generateChatId()
-}
+/** @description 是否开启复杂模式（传递更多参数） */
+const isComplexMode = ref(false)
+/** @description 情绪背景参数 */
+const conversationScene = ref('')
+/** @description 情感指数参数 */
+const emotionalIndex = ref<number | undefined>(undefined)
+/** @description 折叠面板激活的 key */
+const activeKey = ref(['1'])
+
+/** @description DeepSeek API 的完整分析结果 */
 const deepseekResult = ref<DeepSeekResult | null>(null)
 
+// --- 聊天会话与 ID ---
+/** @description 生成一个唯一的 chatId */
+const generateChatId = (): string => `ocr_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+/** @description 当前聊天会话的 ID，用于关联请求 */
+const chatIdInput = ref(generateChatId())
+/** @description 刷新 chatId，开始新的会话 */
+const refreshChatId = () => { chatIdInput.value = generateChatId() }
+
+// --- 计算属性 ---
+/** @description 判断是否可以开始识别（必须有图片、未在处理中、且有总提示词） */
+const canStart = computed(() => !!imageBase64Raw.value && !processing.value && !!totalPrompt.value?.trim())
+/** @description 判断当前页面是否处于有内容的状态（用于切换空状态和主内容） */
+const hasContent = computed(() => !!imageBase64Raw.value || items.value.length > 0 || !!imageExtractText.value || !!imageDetailsText.value || !!deepseekResult.value)
+
+
+// =================================================================================================
+// ✨ UI 交互与事件处理
+// =================================================================================================
+
+// --- 情感标签管理 ---
+/** @description 预设的情感标签列表 */
 const emotionTags = ref<string[]>(['推荐', '高情商', '哄女友', '暧昧拉扯', '霸道总裁', '撩女生'])
+/** @description 控制“添加标签”输入框的显示/隐藏 */
 const addTagVisible = ref(false)
+/** @description 绑定“添加标签”输入框的值 */
 const newTag = ref('')
+
+/** @description 切换“添加标签”输入框的可见性 */
 const toggleAddTag = () => { addTagVisible.value = !addTagVisible.value }
+
+/** @description 确认添加新标签 */
 const confirmAddTag = () => {
   const v = newTag.value.trim()
   if (!v) { message.warning('请输入标签'); return }
@@ -285,48 +396,109 @@ const confirmAddTag = () => {
   newTag.value = ''
   addTagVisible.value = false
 }
+
+/**
+ * @description 处理情感标签点击事件，触发 AI 续写。
+ * @param {string} label - 被点击的标签文本。
+ */
+const continuationRunning = ref(false)
 const handleEmotionTagClick = async (label: string) => {
+  if (continuationRunning.value) { message.info('正在续写中，请稍候'); return }
+  // 1. 获取当前情感指数，若不存在则默认为 6
   const idx = typeof deepseekResult.value?.overallEmotionalIndex === 'number' ? (deepseekResult.value as DeepSeekResult).overallEmotionalIndex as number : 6
   const chatId = (chatIdInput.value || generateChatId()).trim()
   const params = { emotionalIndex: idx, emotionalLabels: label, chatId }
+
+  // 2. 准备 UI，插入一个加载占位符到消息列表顶部
   if (!deepseekResult.value) { deepseekResult.value = { messages: [] } }
   const existing = (deepseekResult.value!.messages as DeepSeekMessage[]) || []
-  const placeholder: DeepSeekMessage = { conversationScene: '续写中', topicNature: '情绪标签', userToneCharacteristics: label, emotionalIndex: idx, message: '正在续写...', messageType: 1, loading: true }
+  const placeholder: DeepSeekMessage = {
+    conversationScene: '续写中',
+    topicNature: '情绪标签',
+    userToneCharacteristics: label,
+    emotionalIndex: idx,
+    message: '正在续写...',
+    messageType: 1,
+    loading: true
+  }
   deepseekResult.value!.messages = [placeholder, ...existing]
+
+  // 3. 启动续写流式请求
   try {
     await startContinuationStream(params)
-  } catch (e) {
-
+  } catch (e: unknown) {
+    // 即使续写失败，也要移除加载状态
+    const messages = deepseekResult.value?.messages || []
+    if (messages[0]?.loading) {
+      messages.shift()
+    }
+    const msg = e instanceof Error ? e.message : String(e)
+    errorMsg.value = `续写失败: ${msg}`
   }
+
+  // 4. (调试用) 将请求参数和结果记录到日志中
   const existingJson = deepseekResult.value ? JSON.stringify(deepseekResult.value) : ''
   const requestJson = JSON.stringify(params)
   combinedText.value += (existingJson ? existingJson + '\n' : '') + requestJson + '\n'
 }
 
+// =================================================================================================
+// ✨ SSE (Server-Sent Events) 通信
+// =================================================================================================
+
+/** @description 用于中断正在进行的续写请求 */
+let continuationAbortController: AbortController | null = null
+
+/**
+ * @description 启动一个 SSE 连接，用于 AI 续写。
+ * @param p - 包含情感指数、标签和 chatId 的参数对象。
+ */
 const startContinuationStream = async (p: { emotionalIndex: number; emotionalLabels: string; chatId: string }) => {
-  if (continuationAbortController) { continuationAbortController.abort(); continuationAbortController = null }
+  // 如果存在旧的控制器，先中断它
+  if (continuationAbortController) {
+    continuationAbortController.abort()
+    continuationAbortController = null
+  }
   continuationAbortController = new AbortController()
+
   const qs = new URLSearchParams({ emotionalIndex: String(p.emotionalIndex), emotionalLabels: p.emotionalLabels, chatId: p.chatId }).toString()
   const url = `/api/stream-ai/travel_guide/chat/sse/continuation?${qs}`
+
   try {
-    const response = await fetch(url, { method: 'POST', signal: continuationAbortController.signal, credentials: 'include' })
+    continuationRunning.value = true
+    const response = await fetch(url, {
+      method: 'POST',
+      signal: continuationAbortController.signal,
+      credentials: 'include'
+    })
+
     if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`) }
     if (!response.body) { throw new Error('Response body is null') }
+
     const reader = response.body.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
     let currentEvent: string | null = null
     let sessionText = ''
+
+    // 持续读取流数据
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
+
       buffer += decoder.decode(value, { stream: true })
       const lines = buffer.split('\n')
       buffer = lines.pop() || ''
+
       for (const line of lines) {
         const trimmedLine = line.trim()
         if (!trimmedLine) continue
-        if (trimmedLine.startsWith('event:')) { currentEvent = trimmedLine.slice(6).trim(); continue }
+
+        if (trimmedLine.startsWith('event:')) {
+          currentEvent = trimmedLine.slice(6).trim()
+          continue
+        }
+
         if (trimmedLine.startsWith('data:')) {
           const idx = line.indexOf('data:')
           const dataStr = idx >= 0 ? line.slice(idx + 5) : trimmedLine.slice(5)
@@ -345,37 +517,63 @@ const startContinuationStream = async (p: { emotionalIndex: number; emotionalLab
         }
       }
     }
+
+    // 处理可能遗留的 buffer 数据
     if (buffer.trim()) {
       const trimmedBuffer = buffer.trim()
-      if (trimmedBuffer.startsWith('event:')) { currentEvent = trimmedBuffer.slice(6).trim() }
-      else if (trimmedBuffer.startsWith('data:')) {
+      if (trimmedBuffer.startsWith('event:')) {
+        currentEvent = trimmedBuffer.slice(6).trim()
+      } else if (trimmedBuffer.startsWith('data:')) {
         const dataStr = buffer.slice(buffer.indexOf('data:') + 5)
         if (dataStr) {
-          try { const data = JSON.parse(dataStr) as StreamLogData; handleSSEMessage(currentEvent as StreamLog['type'] | null, data); const frag = extractTextFragment(data); if (frag) { sessionText += frag } }
-          catch { handleSSEMessage('text', dataStr); sessionText += dataStr }
+          try {
+            const data = JSON.parse(dataStr) as StreamLogData
+            handleSSEMessage(currentEvent as StreamLog['type'] | null, data)
+            const frag = extractTextFragment(data)
+            if (frag) { sessionText += frag }
+          } catch {
+            handleSSEMessage('text', dataStr)
+            sessionText += dataStr
+          }
         }
       }
     }
 
+    // 解析并更新最终结果
     const msgs = parseContinuationMessages(sessionText)
     if (msgs.length) {
       if (!deepseekResult.value) { deepseekResult.value = { messages: [] } }
       const existing = (deepseekResult.value!.messages as DeepSeekMessage[]) || []
+      // 移除加载占位符
       if (existing[0] && existing[0].loading) { existing.shift() }
-      msgs.forEach((m) => { (m as any).celebrate = true })
+      // 为新消息添加庆祝动画触发器
+      msgs.forEach((m) => { m.celebrate = true })
       deepseekResult.value!.messages = [...msgs, ...existing]
       console.log('messages after continuation:', JSON.stringify(deepseekResult.value!.messages))
-
     }
+
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : '续写失败'
     console.log('continuation SSE error:', errorMessage)
+    // 确保在出错时也能移除加载状态
+    if (deepseekResult.value?.messages?.[0]?.loading) {
+      deepseekResult.value.messages.shift()
+    }
+  } finally {
+    continuationRunning.value = false
   }
 }
 
+/**
+ * @description 从 SSE 返回的文本中解析出结构化的消息对象。
+ * @param {string} text - 包含一个或多个 JSON 对象的字符串。
+ * @returns {DeepSeekMessage[]} - 解析后的消息数组。
+ */
 const parseContinuationMessages = (text: string): DeepSeekMessage[] => {
   const result: DeepSeekMessage[] = []
   if (!text) return result
+
+  // 使用正则表达式匹配所有顶级的 JSON 对象
   const matches = text.match(/\{[\s\S]*?\}/g) || []
   for (const m of matches) {
     try {
@@ -388,28 +586,51 @@ const parseContinuationMessages = (text: string): DeepSeekMessage[] => {
         relationshipType: obj.relationshipType,
         topicNature: obj.topicNature,
         userToneCharacteristics: obj.userToneCharacteristics,
-        messageType: 1,
+        messageType: 1, // 标记为续写消息
       }
       result.push(msg)
-    } catch { }
+    } catch {
+      // 忽略无法解析的片段
+    }
   }
   return result
 }
 
+// =================================================================================================
+// ✨ 图片与文件上传
+// =================================================================================================
+
+/** @description antd-vue 的 Upload 组件所需的文件列表 */
 interface UploadFile { uid: string; name: string; status?: string; originFileObj?: File }
 const fileList = ref<UploadFile[]>([])
+
+/** @description 上传图片的原始 Base64 字符串（不含 data:image/... 前缀） */
 const imageBase64Raw = ref<string | null>(null)
+/** @description 上传图片的文件名 */
 const imageFileName = ref<string>('')
+/** @description 如果图片已存入数据库，则记录其路径 */
 const dbImagePath = ref<string>('')
+
+/**
+ * @description 计算最终用于 `<img>` 标签的 src URL。
+ * 优先使用 Base64 数据，其次是数据库路径。
+ */
 const imageUrl = computed(() => {
   if (imageBase64Raw.value) return `data:image/png;base64,${imageBase64Raw.value}`
   if (dbImagePath.value) return getImageDisplayUrl(dbImagePath.value)
   return ''
 })
 
-let abortController: AbortController | null = null
-let continuationAbortController: AbortController | null = null
+// =================================================================================================
+// ✨ 主识别流程与流式日志
+// =================================================================================================
 
+/** @description 用于中断主识别流程（非续写） */
+let abortController: AbortController | null = null
+
+/**
+ * @description SSE 流中单个 data 对象的结构。
+ */
 interface StreamLogData {
   type?: string
   text?: string
@@ -423,18 +644,45 @@ interface StreamLogData {
   [key: string]: unknown
 }
 
-type StreamLog = { type: 'ocr_progress' | 'ocr_complete' | 'error' | 'complete' | 'text'; timestamp: number; data: StreamLogData | string }
-const streamLogs = ref<StreamLog[]>([])
-const MAX_LOG_COUNT = 200
+/**
+ * @description 内部日志记录的结构。
+ */
+type StreamLog = {
+  type: 'ocr_progress' | 'ocr_complete' | 'error' | 'complete' | 'text'
+  timestamp: number
+  data: StreamLogData | string
+}
 
+/** @description 存储所有流式日志，用于在“实时返回内容”卡片中显示 */
+const streamLogs = ref<StreamLog[]>([])
+const MAX_LOG_COUNT = 200 // 限制最大日志数量，防止内存溢出
+
+/**
+ * @description 向日志列表中添加一条新日志。
+ * @param log - 要添加的日志对象。
+ */
 const addStreamLog = (log: StreamLog) => {
+  // 移除敏感或不需要在 UI 上显示的字段，如 bbox
   const dataSanitized = typeof log.data === 'object' && log.data !== null ? { ...(log.data as Record<string, unknown>) } : log.data
   if (typeof dataSanitized === 'object') { delete (dataSanitized as Record<string, unknown>).bbox }
-  streamLogs.value.unshift({ ...log, data: dataSanitized })
-  if (streamLogs.value.length > MAX_LOG_COUNT) { streamLogs.value = streamLogs.value.slice(0, MAX_LOG_COUNT) }
-}
-const clearStreamLogs = () => { streamLogs.value = []; combinedText.value = '' }
 
+  streamLogs.value.unshift({ ...log, data: dataSanitized })
+  if (streamLogs.value.length > MAX_LOG_COUNT) {
+    streamLogs.value = streamLogs.value.slice(0, MAX_LOG_COUNT)
+  }
+}
+
+/** @description 清空所有流式日志和组合文本 */
+const clearStreamLogs = () => {
+  streamLogs.value = []
+  combinedText.value = ''
+}
+
+/**
+ * @description 从 SSE 的 data 负载中提取特定的文本片段（例如，DeepSeek 的增量返回）。
+ * @param payload - SSE 的 data 负载。
+ * @returns {string} - 提取出的文本片段。
+ */
 const extractTextFragment = (payload: StreamLogData | string): string => {
   if (typeof payload === 'string') return ''
   if (!payload) return ''
@@ -442,21 +690,38 @@ const extractTextFragment = (payload: StreamLogData | string): string => {
   return typeof v === 'string' ? v : ''
 }
 
+// --- 流数据解析与状态 ---
+/** @description 从流中解析出的“截图解析”文本 */
 const imageExtractText = ref('')
+/** @description 从流中解析出的“截图细节”文本 */
 const imageDetailsText = ref('')
+/** @description 用于拼接 DeepSeek 返回的 JSON 字符串的缓冲区 */
 const deepseekBuffer = ref('')
+
+/**
+ * @description 尝试将字符串解析为 DeepSeekResult JSON 对象。
+ * @param {string} s - 可能包含 JSON 的字符串。
+ * @returns {DeepSeekResult | null} - 解析成功则返回对象，否则返回 null。
+ */
 const tryParseJson = (s: string): DeepSeekResult | null => {
   try { return JSON.parse(s) as DeepSeekResult } catch { return null }
 }
+
+/**
+ * @description 将新的 DeepSeekResult 对象深度合并到现有的 `deepseekResult` ref 中。
+ * @param {DeepSeekResult} obj - 新的、部分或完整的 DeepSeekResult 对象。
+ */
 const mergeDeepseekResult = (obj: DeepSeekResult) => {
   if (!obj) return
-  if (!deepseekResult.value) { deepseekResult.value = { backgroundAnalysis: {}, messages: [], overallEmotionalIndex: undefined, emotionalReason: undefined } }
+  if (!deepseekResult.value) {
+    deepseekResult.value = { backgroundAnalysis: {}, messages: [], overallEmotionalIndex: undefined, emotionalReason: undefined }
+  }
   const cur = deepseekResult.value as DeepSeekResult
   if (obj.backgroundAnalysis) { cur.backgroundAnalysis = { ...(cur.backgroundAnalysis || {}), ...obj.backgroundAnalysis } }
   if (typeof obj.overallEmotionalIndex === 'number') { cur.overallEmotionalIndex = obj.overallEmotionalIndex }
   if (obj.emotionalReason) { cur.emotionalReason = obj.emotionalReason }
   if (Array.isArray(obj.messages) && obj.messages.length) {
-    const normalized = obj.messages.map((m) => ({ ...m, messageType: typeof (m as any).messageType === 'number' ? (m as any).messageType : 0 }))
+    const normalized = obj.messages.map((m) => ({ ...m, messageType: typeof m.messageType === 'number' ? m.messageType : 0 }))
     cur.messages = [...(cur.messages || []), ...normalized]
   }
   deepseekResult.value = { ...cur }
@@ -465,13 +730,13 @@ const parseTaggedContentIncremental = (incoming: string) => {
   if (!incoming) return
   const s = incoming
   const imgRegex = /<ggy>\[image]\s*(?:```(?:json|text)?\s*([\s\S]*?)```|([\s\S]*?)(?=<ggy>|$))/ig
-  let imgMatch
+  let imgMatch: RegExpExecArray | null
   while ((imgMatch = imgRegex.exec(s)) !== null) {
     const content = (imgMatch[1] || imgMatch[2] || '').trim()
     if (content) { imageExtractText.value = imageExtractText.value ? `${imageExtractText.value}\n${content}` : content }
   }
   const detailsRegex = /---截图细节---\s*([\s\S]*?)(?=<ggy>|$)/g
-  let detMatch
+  let detMatch: RegExpExecArray | null
   while ((detMatch = detailsRegex.exec(s)) !== null) {
     const content = (detMatch[1] || '').trim()
     if (content) { imageDetailsText.value = imageDetailsText.value ? `${imageDetailsText.value}\n${content}` : content }
@@ -518,25 +783,6 @@ const parseTaggedContentIncremental = (incoming: string) => {
   deepseekBuffer.value = buf
 }
 
-const getLogTagColor = (type: string): string => {
-  switch (type) {
-    case 'ocr_progress': return 'blue'
-    case 'ocr_complete': return 'green'
-    case 'error': return 'red'
-    case 'complete': return 'cyan'
-    default: return 'default'
-  }
-}
-const getLogTypeLabel = (type: string): string => {
-  switch (type) {
-    case 'ocr_progress': return '进度'
-    case 'ocr_complete': return '完成'
-    case 'error': return '错误'
-    case 'complete': return '完成'
-    case 'text': return '文本'
-    default: return type
-  }
-}
 
 const beforeUpload = () => false
 interface UploadChangeInfo { fileList: UploadFile[]; file?: { originFileObj?: File } }
@@ -593,6 +839,17 @@ const startStream = async () => {
     formData.append('file', file)
     formData.append('message', totalPrompt.value.trim())
     formData.append('chatId', chatId)
+
+    // 如果是复杂模式，传递额外的参数
+    if (isComplexMode.value) {
+      if (conversationScene.value && conversationScene.value.trim()) {
+        formData.append('conversationScene', conversationScene.value.trim())
+      }
+      if (emotionalIndex.value !== undefined && emotionalIndex.value !== null) {
+        formData.append('emotionalIndex', String(emotionalIndex.value))
+      }
+    }
+
     abortController = new AbortController()
     const response = await fetch('/api/stream-ai/travel_guide/chat/sse/emitter', { method: 'POST', body: formData, signal: abortController.signal, credentials: 'include' })
     if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`) }
@@ -655,7 +912,8 @@ const handleSSEMessage = (eventType: StreamLog['type'] | null, payload: StreamLo
   if (logType === 'text') {
     const frag = extractTextFragment(payload)
     if (frag) {
-      combinedText.value += frag
+      combinedText.value = combinedText.value + frag
+      if (combinedText.value.length > 4000) { combinedText.value = combinedText.value.slice(-4000) }
       parseTaggedContentIncremental(frag)
       if (items.value.length === 0) { items.value.push({ text: combinedText.value }) }
       else { items.value[0].text = combinedText.value }
@@ -688,14 +946,6 @@ const handleSSEMessage = (eventType: StreamLog['type'] | null, payload: StreamLo
   }
 }
 
-const formatTimestamp = (timestamp: number): string => {
-  const date = new Date(timestamp)
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  const ms = String(date.getMilliseconds()).padStart(3, '0')
-  return `${hours}:${minutes}:${seconds}.${ms}`
-}
 
 const base64ToFile = (base64: string, filename: string): Promise<File> => {
   return new Promise((resolve) => {
@@ -737,9 +987,134 @@ const copyMessage = async (text: string, emotionalIndex?: number | null, e?: Eve
   }
 }
 
+// =================================================================================================
+// ✨ Canvas 动画与加载文案
+// =================================================================================================
+
+const loadingTexts = [
+  '正在连接情感雷达...',
+  '正在分析对话场景...',
+  '正在解读潜台词...',
+  '稍等一下，马上就好...',
+  '欢迎来到小扬情感雷达...',
+  'AI 正在疯狂思考中...',
+  '正在构建情感分析报告...',
+  '识别中，请耐心等待...'
+]
+const currentLoadingText = ref(loadingTexts[0])
+let loadingTextInterval: any = null
+
+const startLoadingTextAnimation = () => {
+  let index = 0
+  currentLoadingText.value = loadingTexts[0]
+  if (loadingTextInterval) clearInterval(loadingTextInterval)
+  loadingTextInterval = setInterval(() => {
+    index = (index + 1) % loadingTexts.length
+    currentLoadingText.value = loadingTexts[index]
+  }, 2500)
+}
+
+const stopLoadingTextAnimation = () => {
+  if (loadingTextInterval) clearInterval(loadingTextInterval)
+  loadingTextInterval = null
+}
+
+const radarCanvas = ref<HTMLCanvasElement | null>(null)
+let canvasCtx: CanvasRenderingContext2D | null = null
+let animationFrameId: number | null = null
+
+const initCanvas = () => {
+  if (!radarCanvas.value) return
+  const canvas = radarCanvas.value
+  const parent = canvas.parentElement
+  if (parent) {
+    canvas.width = parent.clientWidth
+    canvas.height = parent.clientHeight
+  }
+  canvasCtx = canvas.getContext('2d')
+  drawScan()
+}
+
+const drawScan = () => {
+  if (!canvasCtx || !radarCanvas.value) return
+  const ctx = canvasCtx
+  const { width, height } = radarCanvas.value
+
+  let scanY = 0
+  const speed = 3 // 扫描速度
+
+  const animate = () => {
+    if (!processing.value) return
+
+    ctx.clearRect(0, 0, width, height)
+
+    // 1. 绘制扫描线（高亮线条）
+    ctx.beginPath()
+    ctx.moveTo(0, scanY)
+    ctx.lineTo(width, scanY)
+    ctx.lineWidth = 2
+    ctx.strokeStyle = '#764ba2' // 紫色调
+    ctx.shadowBlur = 10
+    ctx.shadowColor = '#667eea'
+    ctx.stroke()
+    ctx.shadowBlur = 0 // 重置阴影
+
+    // 2. 绘制扫描拖尾（渐变）
+    const gradient = ctx.createLinearGradient(0, scanY, 0, scanY - 150) // 向上拖尾
+    gradient.addColorStop(0, 'rgba(118, 75, 162, 0.4)')
+    gradient.addColorStop(1, 'rgba(118, 75, 162, 0)')
+
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, scanY - 150, width, 150)
+
+    // 3. 随机生成一些“目标点”闪烁（可选，增加科技感）
+    if (Math.random() > 0.92) {
+      const x = Math.random() * width
+      // 只在扫描线附近生成点
+      const y = scanY - Math.random() * 50
+      if (y > 0) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
+        ctx.beginPath()
+        ctx.arc(x, y, 2, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    // 更新位置
+    scanY += speed
+    if (scanY > height) {
+      scanY = 0
+    }
+
+    animationFrameId = requestAnimationFrame(animate)
+  }
+  animate()
+}
+
+watch(processing, (newVal) => {
+  if (newVal) {
+    startLoadingTextAnimation()
+    nextTick(() => initCanvas())
+  } else {
+    stopLoadingTextAnimation()
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId)
+      animationFrameId = null
+    }
+  }
+})
+
 const progressPercent = computed(() => { if (!progressTotal.value) return 0; return Math.min(100, Math.round((progressIndex.value / progressTotal.value) * 100)) })
 
-onBeforeUnmount(() => { if (abortController) { abortController.abort(); abortController = null } })
+onBeforeUnmount(() => {
+  stopLoadingTextAnimation()
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+  if (abortController) { abortController.abort(); abortController = null }
+  if (continuationAbortController) { continuationAbortController.abort(); continuationAbortController = null }
+})
 
 const tryLoadByChatId = async (chatId: string) => {
   try {
@@ -809,7 +1184,9 @@ onMounted(() => {
   font-weight: 700;
   background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 /* 空状态样式 */
@@ -836,6 +1213,7 @@ onMounted(() => {
   font-size: 80px;
   margin-bottom: 20px;
   animation: float 3s ease-in-out infinite;
+  will-change: transform;
 }
 
 @keyframes float {
@@ -974,26 +1352,57 @@ onMounted(() => {
   object-fit: contain;
 }
 
-.scan-overlay {
+.scan-canvas {
   position: absolute;
   left: 0;
   top: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(102, 126, 234, 0.15) 50%, rgba(255, 255, 255, 0) 100%);
-  animation: scanMove 1.8s linear infinite;
+  width: 100%;
+  height: 100%;
   z-index: 10;
   pointer-events: none;
 }
 
-@keyframes scanMove {
-  0% {
-    transform: translateY(-100%);
+.dynamic-loading-text {
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 12px;
+  min-height: 24px;
+  transition: all 0.5s ease;
+}
+
+.fade-in-text {
+  animation: textFadeIn 0.5s ease-out;
+}
+
+@keyframes textFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
   }
 
-  100% {
-    transform: translateY(100%);
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
+
+/* 优化卡片样式细节 */
+.glass-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* 优化按钮样式 */
+.ant-btn-round {
+  border-radius: 50px;
 }
 
 /* 上传组件样式 */
@@ -1144,6 +1553,7 @@ onMounted(() => {
   border-radius: 12px;
   position: relative;
   transition: transform 0.2s ease;
+  will-change: transform, opacity;
 }
 
 .message:hover {
@@ -1192,6 +1602,7 @@ onMounted(() => {
 
 .celebrate {
   animation: celebratePop 2s ease-out;
+  will-change: transform, opacity;
 }
 
 @keyframes celebratePop {
@@ -1249,6 +1660,7 @@ onMounted(() => {
   transform: translate(0, 0) rotate(0);
   opacity: 0;
   animation: confettiFly 1s ease-out forwards;
+  will-change: transform, opacity;
 }
 
 .c1 {
@@ -1346,6 +1758,7 @@ onMounted(() => {
   transform: translate(0, 0) scale(0.9);
   opacity: 0;
   animation: emojiRise 1s ease-out forwards;
+  will-change: transform, opacity;
 }
 
 .e1 {
@@ -1616,6 +2029,7 @@ onMounted(() => {
 /* 淡入动画 */
 .fade-in {
   animation: fadeInUp 0.4s ease-out;
+  will-change: transform, opacity;
 }
 
 @keyframes fadeInUp {
@@ -1679,6 +2093,35 @@ onMounted(() => {
     min-width: 65px;
     padding: 10px 16px;
   }
+}
+
+/* 优先照顾低动效偏好用户，避免高频动画造成不适 */
+@media (prefers-reduced-motion: reduce) {
+
+  .hero-illustration,
+  .scan-overlay,
+  .loading-text,
+  .typing-dots i,
+  .loading-progress .bar,
+  .celebrate,
+  .confetti,
+  .emoji,
+  .fade-in {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 列表过渡效果（TransitionGroup） */
+.list-fade-enter-active,
+.list-fade-leave-active {
+  transition: all .25s ease;
+}
+
+.list-fade-enter-from,
+.list-fade-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 @media (min-width: 768px) and (max-width: 1200px) {
