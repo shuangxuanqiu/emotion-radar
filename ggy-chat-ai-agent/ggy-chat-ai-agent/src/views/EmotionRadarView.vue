@@ -28,12 +28,14 @@
 
           <a-upload class="hero-uploader" :show-upload-list="false" :before-upload="beforeUpload" accept="image/*"
             :disabled="processing" @change="onUploadChange">
-            <a-button type="primary" size="large" shape="round" class="upload-button">
-              <template #icon>
-                <UploadOutlined />
-              </template>
-              上传聊天截图试试吧
-            </a-button>
+            <div style="display: flex; justify-content: center; width: 100%;">
+              <a-button type="primary" size="large" shape="round" class="upload-button">
+                <template #icon>
+                  <UploadOutlined />
+                </template>
+                上传聊天截图试试吧
+              </a-button>
+            </div>
           </a-upload>
 
           <div class="upload-hint">请放心上传，我们不会保存您的聊天截图</div>
@@ -1148,7 +1150,13 @@ const tryLoadByChatId = async (chatId: string) => {
 
 onMounted(() => {
   const route = useRoute()
-  const qId = (route.query?.chatId as string) || new URLSearchParams(location.search).get('chatId') || ''
+  // 兼容 chatId 和 chatid 两种写法
+  const qId = (route.query?.chatId as string) || 
+              (route.query?.chatid as string) || 
+              new URLSearchParams(location.search).get('chatId') || 
+              new URLSearchParams(location.search).get('chatid') || 
+              ''
+  
   if (qId) {
     chatIdInput.value = qId
     tryLoadByChatId(qId)
@@ -1254,6 +1262,9 @@ onMounted(() => {
   font-size: 16px !important;
   height: auto !important;
   padding: 12px 32px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .upload-hint {

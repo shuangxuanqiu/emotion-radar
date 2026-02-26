@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>毕业设计开题报告 - 龚高扬</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .slide-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 90%;
+            height: 90%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 0.5em;
+            color: #42b883;
+        }
+
+        h2 {
+            font-size: 2em;
+            margin-bottom: 1em;
+            color: #647eff;
+        }
+
+        p {
+            font-size: 1.5em;
+            line-height: 1.6;
+            max-width: 800px;
+            margin-bottom: 1em;
+        }
+
+        .image-container {
+            max-width: 80%;
+            max-height: 60vh;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            display: block;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+        }
+
+        button {
+            background-color: #42b883;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #33a06f;
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 5px;
+            background-color: #42b883;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 1.2em;
+            color: #888;
+        }
+
+        .grid-images {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .grid-images .image-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .grid-images img {
+            max-height: 50vh;
+        }
+
+        .caption {
+            margin-top: 10px;
+            font-size: 1em;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="slide-container">
+    
+    <!-- Slide 1: Title -->
+    <div class="slide active" id="slide-1">
+        <h1>基于大模型的智能对话助手</h1>
+        <h2>毕业设计开题报告</h2>
+        <p>汇报人：龚高扬</p>
+        <p>项目：my-ai-agent</p>
+    </div>
+
+    <!-- Slide 2: Project Overview -->
+    <div class="slide" id="slide-2">
+        <h1>项目简介</h1>
+        <p>本项目致力于构建一个集成了自然语言处理、图像分析与情感识别的综合性智能体系统。</p>
+        <ul style="text-align: left; font-size: 1.5em; display: inline-block;">
+            <li>后端架构：Java Spring Boot</li>
+            <li>前端架构：Vue.js</li>
+            <li>核心能力：LLM 集成 (DeepSeek/Claude)、RAG、OCR</li>
+        </ul>
+    </div>
+
+    <!-- Slide 3: Core Features - Home -->
+    <div class="slide" id="slide-3">
+        <h1>系统功能主页</h1>
+        <p>集成多模态交互入口，提供直观的操作界面。</p>
+        <div class="image-container">
+            <img src="./效果图片/功能主页.png" alt="功能主页">
+        </div>
+    </div>
+
+    <!-- Slide 4: AI Generation Process -->
+    <div class="slide" id="slide-4">
+        <h1>AI 实时生成</h1>
+        <p>支持流式响应，实时展示 AI 思考与生成过程。</p>
+        <div class="image-container">
+            <img src="./效果图片/生成中的页面.png" alt="生成中的页面">
+        </div>
+    </div>
+
+    <!-- Slide 5: AI Continuation -->
+    <div class="slide" id="slide-5">
+        <h1>智能续写功能</h1>
+        <p>基于上下文的智能文本续写，辅助内容创作。</p>
+        <div class="image-container">
+            <img src="./效果图片/ai 续写页面.png" alt="ai 续写页面">
+        </div>
+    </div>
+
+    <!-- Slide 6: Iterative Improvement -->
+    <div class="slide" id="slide-6">
+        <h1>生成效果迭代对比</h1>
+        <div class="grid-images">
+            <div class="image-wrapper">
+                <img src="./效果图片/迭代之前的版本.png" alt="迭代之前的版本">
+                <div class="caption">迭代前</div>
+            </div>
+            <div class="image-wrapper">
+                <img src="./效果图片/生成结束-迭代后的结果.png" alt="生成结束-迭代后的结果">
+                <div class="caption">迭代后</div>
+            </div>
+        </div>
+        <p style="margin-top: 20px; font-size: 1.2em;">通过优化 Prompt 与模型参数，显著提升了生成内容的准确性与逻辑性。</p>
+    </div>
+
+    <!-- Slide 7: Conclusion -->
+    <div class="slide" id="slide-7">
+        <h1>谢谢观看</h1>
+        <h2>请老师批评指正</h2>
+    </div>
+
+    <div class="controls">
+        <button id="prevBtn" onclick="changeSlide(-1)" disabled>上一页</button>
+        <button id="nextBtn" onclick="changeSlide(1)">下一页</button>
+    </div>
+
+    <div class="slide-number" id="slideNumber">1 / 7</div>
+    <div class="progress" id="progressBar"></div>
+
+</div>
+
+<script>
+    let currentSlide = 1;
+    const totalSlides = 7;
+
+    function changeSlide(direction) {
+        const nextSlide = currentSlide + direction;
+
+        if (nextSlide >= 1 && nextSlide <= totalSlides) {
+            // Hide current slide
+            document.getElementById(`slide-${currentSlide}`).classList.remove('active');
+            
+            // Show next slide
+            document.getElementById(`slide-${nextSlide}`).classList.add('active');
+            
+            currentSlide = nextSlide;
+            updateControls();
+        }
+    }
+
+    function updateControls() {
+        // Update buttons
+        document.getElementById('prevBtn').disabled = currentSlide === 1;
+        document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+
+        // Update slide number
+        document.getElementById('slideNumber').innerText = `${currentSlide} / ${totalSlides}`;
+
+        // Update progress bar
+        const progress = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+        document.getElementById('progressBar').style.width = `${progress}%`;
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowRight' || event.key === ' ') {
+            changeSlide(1);
+        } else if (event.key === 'ArrowLeft') {
+            changeSlide(-1);
+        }
+    });
+
+    // Initialize
+    updateControls();
+</script>
+
+</body>
+</html>
